@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky",
+    "router": "pnpm --filter router"
   },
   "keywords": [],
   "author": "",
