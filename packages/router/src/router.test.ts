@@ -7,20 +7,18 @@ import { deferred } from "common";
 function getAddress(server: http.Server) {
   const { promise, resolve, reject } = deferred<AddressInfo>();
 
-  function get(orElse: () => void) {
+  server.on("listening", () => {
     const addr = server.address();
     if (addr && typeof addr !== "string") {
       resolve(addr);
     }
-    orElse();
-  }
-
-  get(() => server.on("listening", () => get(reject)));
+    reject();
+  });
 
   return promise;
 }
 
-test("router", async () => {
+test("basically works", async () => {
   const server = http.createServer().listen(0);
 
   createRouter(server).get("/", () => "hello world");
