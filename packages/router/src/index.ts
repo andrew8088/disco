@@ -1,1 +1,3 @@
-export * from "./router";
+import createRouter from "./router";
+
+export default createRouter;
