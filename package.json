@@ -8,7 +8,8 @@
     "format": "prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky",
-    "router": "pnpm --filter router"
+    "router": "pnpm --filter router",
+    "common": "pnpm --filter common"
   },
   "keywords": [],
   "author": "",

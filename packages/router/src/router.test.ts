@@ -2,19 +2,22 @@ import { expect, test } from "vitest";
 import { type AddressInfo } from "node:net";
 import http from "node:http2";
 import createRouter from "./router";
+import { deferred } from "common";
 
-function getAddress(server: http.Http2Server): Promise<AddressInfo> {
-  return new Promise((resolve, reject) => {
-    server.on("listening", () => {
-      const addr = server.address();
+function getAddress(server: http.Http2Server) {
+  const { promise, resolve, reject } = deferred<AddressInfo>();
 
-      if (addr && typeof addr !== "string") {
-        resolve(addr);
-      }
+  function get(orElse: () => void) {
+    const addr = server.address();
+    if (addr && typeof addr !== "string") {
+      resolve(addr);
+    }
+    orElse();
+  }
 
-      reject(addr);
-    });
-  });
+  get(() => server.on("listening", () => get(reject)));
+
+  return promise;
 }
 
 test("router", async () => {

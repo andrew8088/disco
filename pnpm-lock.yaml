@@ -42,7 +42,26 @@ importers:
         specifier: ^3.2.5
         version: 3.2.5
 
+  packages/common:
+    devDependencies:
+      typescript:
+        specifier: ^5.2.2
+        version: 5.4.2
+      vite:
+        specifier: ^5.1.4
+        version: 5.1.5(@types/node@20.11.25)
+      vite-plugin-dts:
+        specifier: ^3.7.3
+        version: 3.7.3(@types/node@20.11.25)(typescript@5.4.2)(vite@5.1.5)
+      vitest:
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.25)
+
   packages/router:
+    dependencies:
+      common:
+        specifier: workspace:^
+        version: link:../common
     devDependencies:
       typescript:
         specifier: ^5.2.2
