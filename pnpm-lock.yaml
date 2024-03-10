@@ -62,6 +62,9 @@ importers:
       '@shaky/common':
         specifier: workspace:*
         version: link:../common
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       typescript:
         specifier: ^5.2.2
@@ -3934,3 +3937,7 @@ packages:
     optionalDependencies:
       commander: 9.5.0
     dev: true
+
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+    dev: false
