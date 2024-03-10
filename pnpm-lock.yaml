@@ -60,7 +60,7 @@ importers:
   packages/router:
     dependencies:
       common:
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../common
     devDependencies:
       typescript:

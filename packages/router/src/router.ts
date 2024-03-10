@@ -1,4 +1,4 @@
-import { type Server } from "http";
+import type { Server, IncomingMessage } from "http";
 
 export default function createRouter(server: Server) {
   return Router.fromServer(server);
@@ -6,19 +6,39 @@ export default function createRouter(server: Server) {
 
 class Router {
   #server: Server;
+
+  #paths = new Set<string>();
+  #routes: Array<[path: string, handler: (req: IncomingMessage) => unknown]> = [];
+
   static fromServer(server: Server) {
     return new Router(server);
   }
 
   private constructor(server: Server) {
     this.#server = server;
-  }
-
-  get(_path: string, handler: () => void) {
-    this.#server.on("request", (_req, res) => {
-      const body = handler();
+    this.#server.on("request", (req, res) => {
+      const route = this.#routes.at(0)!;
+      const body = route[1](req);
       res.write(body);
       res.end();
     });
+  }
+
+  get<T>(path: string, handler: (req: IncomingMessage) => T) {
+    if (this.#paths.has(path)) {
+      throw new RouterError(`cannot register another handler for ${path}`);
+    }
+
+    this.#paths.add(path);
+    this.#routes.push([path, handler]);
+    return this;
+  }
+}
+
+class RouterError extends Error {
+  type = "RouterError" as const;
+
+  constructor(message: string) {
+    super(message);
   }
 }
