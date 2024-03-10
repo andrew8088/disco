@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "pnpm --filter './{packages,apps}/*' test",
     "prepare": "husky",
     "router": "pnpm --filter router",
     "common": "pnpm --filter common"
