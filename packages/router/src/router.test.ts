@@ -98,6 +98,18 @@ describe("router", () => {
     await assertResponse(client.get("/user/andrew"), "2");
     await assertResponse(client.get("/user/andrew/post"), "3");
   });
+
+  it("strips a trailing slash", async () => {
+    const [client, server] = await getClientAndServer();
+    createRouter(server).get("/user/", () => "1");
+    await assertResponse(client.get("/user"), "1");
+  });
+
+  it("adds a leading slash", async () => {
+    const [client, server] = await getClientAndServer();
+    createRouter(server).get("user", () => "1");
+    await assertResponse(client.get("/user"), "1");
+  });
 });
 
 async function assertResponse(req: Promise<Response>, expectedBody: string, expectedStatusCode?: number) {

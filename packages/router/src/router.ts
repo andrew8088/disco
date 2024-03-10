@@ -43,14 +43,15 @@ class Router {
   }
 
   get(path: string, handler: Handler) {
-    const simplePath = normalizePathTokens(path);
+    const cleanedPath = cleanPath(path);
+    const normalPath = normalizePath(cleanedPath);
 
-    if (this.#paths.has(simplePath)) {
-      throw new RouterError(`cannot register another handler for ${this.#paths.get(simplePath)}`);
+    if (this.#paths.has(normalPath)) {
+      throw new RouterError(`cannot register another handler for ${this.#paths.get(normalPath)}`);
     }
 
-    this.#paths.set(simplePath, path);
-    this.#routes.push([match(path), handler]);
+    this.#paths.set(normalPath, cleanedPath);
+    this.#routes.push([match(cleanedPath), handler]);
     return this;
   }
 }
@@ -63,6 +64,10 @@ class RouterError extends Error {
   }
 }
 
-function normalizePathTokens(path: string) {
+function normalizePath(path: string) {
   return path.replaceAll(/:\w+/g, ":");
+}
+
+function cleanPath(path: string) {
+  return path.replace(/\/$/, "").replace(/^([^/])/, "/$1");
 }
