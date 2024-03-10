@@ -59,7 +59,7 @@ importers:
 
   packages/router:
     dependencies:
-      common:
+      '@shaky/common':
         specifier: workspace:*
         version: link:../common
     devDependencies:

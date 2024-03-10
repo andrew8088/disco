@@ -1,10 +1,9 @@
 {
-  "name": "router",
+  "name": "@shaky/router",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
   "scripts": {
     "dev": "vite",
     "test": "vitest",
@@ -18,6 +17,6 @@
     "vitest": "^1.3.1"
   },
   "dependencies": {
-    "common": "workspace:*"
+    "@shaky/common": "workspace:*"
   }
 }
