@@ -59,7 +59,7 @@ importers:
 
   packages/router:
     dependencies:
-      '@shaky/common':
+      '@disco/common':
         specifier: workspace:*
         version: link:../common
       path-to-regexp:

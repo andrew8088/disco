@@ -1,7 +1,7 @@
 import { expect, it, describe } from "vitest";
 import http from "http";
 import createRouter from "./router";
-import { deferred } from "@shaky/common";
+import { deferred } from "@disco/common";
 
 describe("router", () => {
   it("responds", async () => {

@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "pnpm --filter './{packages,apps}/*' test",
+    "test": "vitest",
     "prepare": "husky",
     "router": "pnpm --filter router",
     "common": "pnpm --filter common"

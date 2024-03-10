@@ -1,5 +1,5 @@
 {
-  "name": "@shaky/router",
+  "name": "@disco/router",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -17,7 +17,7 @@
     "vitest": "^1.3.1"
   },
   "dependencies": {
-    "@shaky/common": "workspace:*",
+    "@disco/common": "workspace:*",
     "path-to-regexp": "^6.2.1",
     "zod": "^3.22.4"
   }
