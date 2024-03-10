@@ -24,6 +24,8 @@ class Router {
           res.end();
         }
       }
+      res.statusCode = 404;
+      res.end();
     });
   }
 

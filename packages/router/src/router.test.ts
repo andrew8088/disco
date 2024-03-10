@@ -50,3 +50,13 @@ it("matches routes", async () => {
   const body2 = await fetch(`http://localhost:${port}/goodbye`).then((r) => r.text());
   expect(body2).toEqual("goodbye");
 });
+
+it("404s if no route matches", async () => {
+  const server = http.createServer().listen(0);
+
+  createRouter(server).get("/hello", () => "hello");
+
+  const port = await getPort(server);
+  const statusCode = await fetch(`http://localhost:${port}/goodbye`).then((r) => r.status);
+  expect(statusCode).toEqual(404);
+});
