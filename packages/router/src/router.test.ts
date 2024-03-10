@@ -56,6 +56,17 @@ describe("router", () => {
     expect(await req.text()).toEqual("");
     expect(req.status).toEqual(204);
   });
+
+  it("parses url params", async () => {
+    const [client, server] = await getClientAndServer();
+
+    createRouter(server).get("/user/:userId", ({ params }) => {
+      return [200, params.userId.toLocaleUpperCase()];
+    });
+
+    const body = await client.get("/user/andrew").then((r) => r.text());
+    expect(body).toEqual("ANDREW");
+  });
 });
 
 async function getClientAndServer() {

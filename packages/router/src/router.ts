@@ -1,7 +1,8 @@
 import { z } from "zod";
-import type { Server, IncomingMessage } from "http";
+import { MatchFunction, match } from "path-to-regexp";
+import type { Server } from "http";
 
-type Handler = (req: IncomingMessage) => unknown | [statusCode: number, body: unknown];
+type Handler = (req: { params: Record<string, string> }) => unknown | [statusCode: number, body: unknown];
 
 const fullHandlerResponse = z.tuple([z.number(), z.unknown()]).catch(({ input }) => {
   return [200, input];
@@ -15,7 +16,7 @@ class Router {
   #server: Server;
 
   #paths = new Set<string>();
-  #routes: Array<[path: string, handler: Handler]> = [];
+  #routes: Array<[path: MatchFunction<object>, handler: Handler]> = [];
 
   static fromServer(server: Server) {
     return new Router(server);
@@ -24,9 +25,13 @@ class Router {
   private constructor(server: Server) {
     this.#server = server;
     this.#server.on("request", (req, res) => {
-      for (const [path, handler] of this.#routes) {
-        if (path === req.url) {
-          const [statusCode, body] = fullHandlerResponse.parse(handler(req));
+      for (const [matchPath, handler] of this.#routes) {
+        const match = matchPath(req.url ?? "");
+
+        if (match) {
+          const [statusCode, body] = fullHandlerResponse.parse(
+            handler({ params: match.params as Record<string, string> }),
+          );
           res.statusCode = statusCode;
           if (body) {
             res.write(body);
@@ -46,7 +51,7 @@ class Router {
     }
 
     this.#paths.add(path);
-    this.#routes.push([path, handler]);
+    this.#routes.push([match(path), handler]);
     return this;
   }
 }
