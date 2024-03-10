@@ -9,11 +9,10 @@ describe("router", () => {
 
     createRouter(server).get("/", () => "hello world");
 
-    const body = await client.get("/").then((r) => r.text());
-    expect(body).toEqual("hello world");
+    await assertResponse(client.get("/"), "hello world");
   });
 
-  it("http methods can only match a given pattern once", async () => {
+  it("accepts one handler per http method and path", async () => {
     const [, server] = await getClientAndServer();
 
     const router = createRouter(server);
@@ -32,10 +31,8 @@ describe("router", () => {
       .get("/hello", () => "hello")
       .get("/goodbye", () => "goodbye");
 
-    const body1 = await client.get("/hello").then((r) => r.text());
-    expect(body1).toEqual("hello");
-    const body2 = await client.get("/goodbye").then((r) => r.text());
-    expect(body2).toEqual("goodbye");
+    await assertResponse(client.get("/hello"), "hello");
+    await assertResponse(client.get("/goodbye"), "goodbye");
   });
 
   it("404s if no route matches", async () => {
@@ -43,8 +40,7 @@ describe("router", () => {
 
     createRouter(server).get("/hello", () => "hello");
 
-    const statusCode = await client.get("/goodbye").then((r) => r.status);
-    expect(statusCode).toEqual(404);
+    await assertResponse(client.get("/goodbye"), "", 404);
   });
 
   it("let handlers set a status code", async () => {
@@ -52,9 +48,7 @@ describe("router", () => {
 
     createRouter(server).get("/hello", () => [204, undefined]);
 
-    const req = await client.get("/hello");
-    expect(await req.text()).toEqual("");
-    expect(req.status).toEqual(204);
+    await assertResponse(client.get("/hello"), "", 204);
   });
 
   it("parses url params", async () => {
@@ -64,10 +58,57 @@ describe("router", () => {
       return [200, params.userId.toLocaleUpperCase()];
     });
 
-    const body = await client.get("/user/andrew").then((r) => r.text());
-    expect(body).toEqual("ANDREW");
+    await assertResponse(client.get("/user/andrew"), "ANDREW");
+  });
+
+  it("recognizes (and throws for) the same path with different token names", async () => {
+    const [, server] = await getClientAndServer();
+
+    const router = createRouter(server);
+
+    router.get("/user/:userId", () => "hello");
+
+    expect(() => {
+      router.get("/user/:id", () => "hello");
+    }).toThrowError("cannot register another handler for /user/:userId");
+  });
+
+  it("recognizes (and throws for) the same path with different token names", async () => {
+    const [, server] = await getClientAndServer();
+
+    const router = createRouter(server);
+
+    router.get("/user/:userId", () => "hello");
+
+    expect(() => {
+      router.get("/user/:id", () => "hello");
+    }).toThrowError("cannot register another handler for /user/:userId");
+  });
+
+  it("matches the longest possible route", async () => {
+    const [client, server] = await getClientAndServer();
+
+    const router = createRouter(server);
+
+    router.get("/user", () => "1");
+    router.get("/user/:userId", () => "2");
+    router.get("/user/:userId/post", () => "3");
+
+    await assertResponse(client.get("/user"), "1");
+    await assertResponse(client.get("/user/andrew"), "2");
+    await assertResponse(client.get("/user/andrew/post"), "3");
   });
 });
+
+async function assertResponse(req: Promise<Response>, expectedBody: string, expectedStatusCode?: number) {
+  const res = await req;
+  const actual = await res.text();
+  expect(actual).toEqual(expectedBody);
+
+  if (expectedStatusCode) {
+    expect(res.status).toEqual(expectedStatusCode);
+  }
+}
 
 async function getClientAndServer() {
   const server = http.createServer().listen(0);

@@ -15,7 +15,7 @@ export default function createRouter(server: Server) {
 class Router {
   #server: Server;
 
-  #paths = new Set<string>();
+  #paths = new Map<string, string>();
   #routes: Array<[path: MatchFunction<object>, handler: Handler]> = [];
 
   static fromServer(server: Server) {
@@ -46,11 +46,13 @@ class Router {
   }
 
   get(path: string, handler: Handler) {
-    if (this.#paths.has(path)) {
-      throw new RouterError(`cannot register another handler for ${path}`);
+    const simplePath = normalizePathTokens(path);
+
+    if (this.#paths.has(simplePath)) {
+      throw new RouterError(`cannot register another handler for ${this.#paths.get(simplePath)}`);
     }
 
-    this.#paths.add(path);
+    this.#paths.set(simplePath, path);
     this.#routes.push([match(path), handler]);
     return this;
   }
@@ -62,4 +64,8 @@ class RouterError extends Error {
   constructor(message: string) {
     super(message);
   }
+}
+
+function normalizePathTokens(path: string) {
+  return path.replaceAll(/:\w+/g, ":");
 }
