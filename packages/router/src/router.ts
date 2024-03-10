@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { MatchFunction, match } from "path-to-regexp";
-import type { Server } from "http";
+import type { Server, IncomingMessage, ServerResponse } from "http";
 
 type Handler = (req: { params: Record<string, string> }) => unknown | [statusCode: number, body: unknown];
 
@@ -13,36 +13,33 @@ export default function createRouter(server: Server) {
 }
 
 class Router {
-  #server: Server;
-
   #paths = new Map<string, string>();
   #routes: Array<[path: MatchFunction<object>, handler: Handler]> = [];
 
   static fromServer(server: Server) {
-    return new Router(server);
+    const r = new Router();
+    server.on("request", (req, res) => r._handleRequest(req, res));
+    return r;
   }
 
-  private constructor(server: Server) {
-    this.#server = server;
-    this.#server.on("request", (req, res) => {
-      for (const [matchPath, handler] of this.#routes) {
-        const match = matchPath(req.url ?? "");
+  _handleRequest(req: IncomingMessage, res: ServerResponse) {
+    for (const [matchPath, handler] of this.#routes) {
+      const match = matchPath(req.url ?? "");
 
-        if (match) {
-          const [statusCode, body] = fullHandlerResponse.parse(
-            handler({ params: match.params as Record<string, string> }),
-          );
-          res.statusCode = statusCode;
-          if (body) {
-            res.write(body);
-          }
-          res.end();
-          return;
+      if (match) {
+        const [statusCode, body] = fullHandlerResponse.parse(
+          handler({ params: match.params as Record<string, string> }),
+        );
+        res.statusCode = statusCode;
+        if (body) {
+          res.write(body);
         }
+        res.end();
+        return;
       }
-      res.statusCode = 404;
-      res.end();
-    });
+    }
+    res.statusCode = 404;
+    res.end();
   }
 
   get(path: string, handler: Handler) {
