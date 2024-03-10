@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import http from "http";
 import createRouter from "./router";
-import { deferred } from "common";
+import { deferred } from "@shaky/common";
 
 function getPort(server: http.Server) {
   const { promise, resolve, reject } = deferred<number>();
@@ -35,4 +35,18 @@ it("http methods can only match a given pattern once", async () => {
   expect(() => {
     router.get("/hello", () => "goodbye");
   }).toThrowError("cannot register another handler for /hello");
+});
+
+it("matches routes", async () => {
+  const server = http.createServer().listen(0);
+
+  createRouter(server)
+    .get("/hello", () => "hello")
+    .get("/goodbye", () => "goodbye");
+
+  const port = await getPort(server);
+  const body1 = await fetch(`http://localhost:${port}/hello`).then((r) => r.text());
+  expect(body1).toEqual("hello");
+  const body2 = await fetch(`http://localhost:${port}/goodbye`).then((r) => r.text());
+  expect(body2).toEqual("goodbye");
 });

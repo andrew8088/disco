@@ -17,10 +17,13 @@ class Router {
   private constructor(server: Server) {
     this.#server = server;
     this.#server.on("request", (req, res) => {
-      const route = this.#routes.at(0)!;
-      const body = route[1](req);
-      res.write(body);
-      res.end();
+      for (const [path, handler] of this.#routes) {
+        if (path === req.url) {
+          const body = handler(req);
+          res.write(body);
+          res.end();
+        }
+      }
     });
   }
 
