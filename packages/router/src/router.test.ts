@@ -7,9 +7,9 @@ describe("router", () => {
   it("responds", async () => {
     const [client, server] = await getClientAndServer();
 
-    createRouter(server).get("/", () => "hello world");
+    createRouter(server).get("/", () => ok("hello"));
 
-    await assertResponse(client.get("/"), "hello world");
+    await assertResponse(client.get("/"), "hello");
   });
 
   it("accepts one handler per http method and path", async () => {
@@ -17,10 +17,10 @@ describe("router", () => {
 
     const router = createRouter(server);
 
-    router.get("/hello", () => "hello");
+    router.get("/hello", () => ok("hello"));
 
     expect(() => {
-      router.get("/hello", () => "goodbye");
+      router.get("/hello", () => ok("goodbye"));
     }).toThrowError("cannot register another handler for /hello");
   });
 
@@ -28,8 +28,8 @@ describe("router", () => {
     const [client, server] = await getClientAndServer();
 
     createRouter(server)
-      .get("/hello", () => "hello")
-      .get("/goodbye", () => "goodbye");
+      .get("/hello", () => ok("hello"))
+      .get("/goodbye", () => ok("goodbye"));
 
     await assertResponse(client.get("/hello"), "hello");
     await assertResponse(client.get("/goodbye"), "goodbye");
@@ -38,7 +38,7 @@ describe("router", () => {
   it("404s if no route matches", async () => {
     const [client, server] = await getClientAndServer();
 
-    createRouter(server).get("/hello", () => "hello");
+    createRouter(server).get("/hello", () => ok("hello"));
 
     await assertResponse(client.get("/goodbye"), "", 404);
   });
@@ -54,9 +54,7 @@ describe("router", () => {
   it("parses url params", async () => {
     const [client, server] = await getClientAndServer();
 
-    createRouter(server).get("/user/:userId", ({ params }) => {
-      return [200, params.userId.toLocaleUpperCase()];
-    });
+    createRouter(server).get("/user/:userId", ({ params }) => ok(params.userId.toLocaleUpperCase()));
 
     await assertResponse(client.get("/user/andrew"), "ANDREW");
   });
@@ -66,10 +64,10 @@ describe("router", () => {
 
     const router = createRouter(server);
 
-    router.get("/user/:userId", () => "hello");
+    router.get("/user/:userId", () => ok("hello"));
 
     expect(() => {
-      router.get("/user/:id", () => "hello");
+      router.get("/user/:id", () => ok("hello"));
     }).toThrowError("cannot register another handler for /user/:userId");
   });
 
@@ -78,10 +76,10 @@ describe("router", () => {
 
     const router = createRouter(server);
 
-    router.get("/user/:userId", () => "hello");
+    router.get("/user/:userId", () => ok("hello"));
 
     expect(() => {
-      router.get("/user/:id", () => "hello");
+      router.get("/user/:id", () => ok("hello"));
     }).toThrowError("cannot register another handler for /user/:userId");
   });
 
@@ -90,9 +88,9 @@ describe("router", () => {
 
     const router = createRouter(server);
 
-    router.get("/user", () => "1");
-    router.get("/user/:userId", () => "2");
-    router.get("/user/:userId/post", () => "3");
+    router.get("/user", () => ok("1"));
+    router.get("/user/:userId", () => ok("2"));
+    router.get("/user/:userId/post", () => ok("3"));
 
     await assertResponse(client.get("/user"), "1");
     await assertResponse(client.get("/user/andrew"), "2");
@@ -101,13 +99,13 @@ describe("router", () => {
 
   it("strips a trailing slash", async () => {
     const [client, server] = await getClientAndServer();
-    createRouter(server).get("/user/", () => "1");
+    createRouter(server).get("/user/", () => ok("1"));
     await assertResponse(client.get("/user"), "1");
   });
 
   it("adds a leading slash", async () => {
     const [client, server] = await getClientAndServer();
-    createRouter(server).get("user", () => "1");
+    createRouter(server).get("user", () => ok("1"));
     await assertResponse(client.get("/user"), "1");
   });
 });
@@ -149,4 +147,8 @@ function getPort(server: http.Server) {
   });
 
   return promise;
+}
+
+function ok(body: string): [number, string] {
+  return [200, body];
 }

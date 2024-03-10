@@ -1,12 +1,7 @@
-import { z } from "zod";
 import { MatchFunction, match } from "path-to-regexp";
 import type { Server, IncomingMessage, ServerResponse } from "http";
 
-type Handler = (req: { params: Record<string, string> }) => unknown | [statusCode: number, body: unknown];
-
-const fullHandlerResponse = z.tuple([z.number(), z.unknown()]).catch(({ input }) => {
-  return [200, input];
-});
+type Handler = (req: { params: Record<string, string> }) => [statusCode: number, body: unknown];
 
 export default function createRouter(server: Server) {
   return Router.fromServer(server);
@@ -27,9 +22,7 @@ class Router {
       const match = matchPath(req.url ?? "");
 
       if (match) {
-        const [statusCode, body] = fullHandlerResponse.parse(
-          handler({ params: match.params as Record<string, string> }),
-        );
+        const [statusCode, body] = handler({ params: match.params as Record<string, string> });
         res.statusCode = statusCode;
         if (body) {
           res.write(body);
