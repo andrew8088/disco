@@ -75,6 +75,19 @@ class Router {
     this.#routes[HTTP_METHOD.get].push([match(cleanedPath), handler as Handler<unknown>]);
     return this;
   }
+
+  post<Path extends string>(path: Path, handler: Handler<PathParams<Path>>) {
+    const cleanedPath = cleanPath(path);
+    const normalPath = normalizePath(cleanedPath);
+
+    if (this.#paths[HTTP_METHOD.post].has(normalPath)) {
+      throw new RouterError(`cannot register another handler for ${this.#paths[HTTP_METHOD.post].get(normalPath)}`);
+    }
+
+    this.#paths[HTTP_METHOD.post].set(normalPath, cleanedPath);
+    this.#routes[HTTP_METHOD.post].push([match(cleanedPath), handler as Handler<unknown>]);
+    return this;
+  }
 }
 
 class RouterError extends Error {

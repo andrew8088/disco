@@ -107,6 +107,14 @@ describe("router", () => {
     createRouter(server).get("user", () => ok("1"));
     await assertResponse(client.get("/user"), "1");
   });
+
+  it("accepts post requests", async () => {
+    const [client, server] = await getClientAndServer();
+    createRouter(server)
+      .get("/user", () => ok("0"))
+      .post("/user", () => ok("1"));
+    await assertResponse(client.post("/user"), "1");
+  });
 });
 
 async function assertResponse(req: Promise<Response>, expectedBody: string, expectedStatusCode?: number) {

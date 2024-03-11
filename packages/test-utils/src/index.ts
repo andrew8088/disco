@@ -11,6 +11,9 @@ export async function getClientAndServer() {
       get(path: string) {
         return fetch(`${baseUrl}${path}`);
       },
+      post(path: string) {
+        return fetch(`${baseUrl}${path}`, { method: "POST" });
+      },
     },
     server,
   ] as const;
