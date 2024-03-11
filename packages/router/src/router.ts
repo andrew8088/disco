@@ -7,9 +7,33 @@ export default function createRouter(server?: Server) {
   return server ? Router.fromServer(server) : Router.new();
 }
 
+const HTTP_METHOD = {
+  get: "GET",
+  post: "POST",
+  put: "PUT",
+  delete: "DELETE",
+} as const;
+
+type Method = (typeof HTTP_METHOD)[keyof typeof HTTP_METHOD];
+
+function parseMethod(m: string | undefined): Method {
+  if (!!m && m.toLowerCase() in HTTP_METHOD) return m as Method;
+  else throw new ParserError(`${m} is not a support HTTP method (supported methods: ${Object.values(HTTP_METHOD)})`);
+}
+
 class Router {
-  #paths = new Map<string, string>();
-  #routes: Array<[path: MatchFunction<object>, handler: Handler<unknown>]> = [];
+  #paths = {
+    [HTTP_METHOD.get]: new Map<string, string>(),
+    [HTTP_METHOD.post]: new Map<string, string>(),
+    [HTTP_METHOD.put]: new Map<string, string>(),
+    [HTTP_METHOD.delete]: new Map<string, string>(),
+  };
+  #routes: { [m in Method]: Array<[path: MatchFunction<object>, handler: Handler<unknown>]> } = {
+    [HTTP_METHOD.get]: [],
+    [HTTP_METHOD.post]: [],
+    [HTTP_METHOD.put]: [],
+    [HTTP_METHOD.delete]: [],
+  };
 
   static new() {
     return new Router();
@@ -22,7 +46,7 @@ class Router {
   }
 
   _handleRequest(req: IncomingMessage, res: ServerResponse) {
-    for (const [matchPath, handler] of this.#routes) {
+    for (const [matchPath, handler] of this.#routes[parseMethod(req.method)]) {
       const match = matchPath(req.url ?? "");
 
       if (match) {
@@ -43,18 +67,26 @@ class Router {
     const cleanedPath = cleanPath(path);
     const normalPath = normalizePath(cleanedPath);
 
-    if (this.#paths.has(normalPath)) {
-      throw new RouterError(`cannot register another handler for ${this.#paths.get(normalPath)}`);
+    if (this.#paths[HTTP_METHOD.get].has(normalPath)) {
+      throw new RouterError(`cannot register another handler for ${this.#paths[HTTP_METHOD.get].get(normalPath)}`);
     }
 
-    this.#paths.set(normalPath, cleanedPath);
-    this.#routes.push([match(cleanedPath), handler as Handler<unknown>]);
+    this.#paths[HTTP_METHOD.get].set(normalPath, cleanedPath);
+    this.#routes[HTTP_METHOD.get].push([match(cleanedPath), handler as Handler<unknown>]);
     return this;
   }
 }
 
 class RouterError extends Error {
   type = "RouterError" as const;
+
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+class ParserError extends Error {
+  type = "ParserError" as const;
 
   constructor(message: string) {
     super(message);
