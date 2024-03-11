@@ -1,15 +1,19 @@
 import { MatchFunction, match } from "path-to-regexp";
 import type { Server, IncomingMessage, ServerResponse } from "http";
 
-type Handler = (req: { params: Record<string, string> }) => [statusCode: number, body: unknown];
+type Handler<P> = (req: { params: P }) => [statusCode: number, body: unknown];
 
-export default function createRouter(server: Server) {
-  return Router.fromServer(server);
+export default function createRouter(server?: Server) {
+  return server ? Router.fromServer(server) : Router.new();
 }
 
 class Router {
   #paths = new Map<string, string>();
-  #routes: Array<[path: MatchFunction<object>, handler: Handler]> = [];
+  #routes: Array<[path: MatchFunction<object>, handler: Handler<unknown>]> = [];
+
+  static new() {
+    return new Router();
+  }
 
   static fromServer(server: Server) {
     const r = new Router();
@@ -22,7 +26,7 @@ class Router {
       const match = matchPath(req.url ?? "");
 
       if (match) {
-        const [statusCode, body] = handler({ params: match.params as Record<string, string> });
+        const [statusCode, body] = handler({ params: match.params });
         res.statusCode = statusCode;
         if (body) {
           res.write(body);
@@ -35,7 +39,7 @@ class Router {
     res.end();
   }
 
-  get(path: string, handler: Handler) {
+  get<Path extends string>(path: Path, handler: Handler<PathParams<Path>>) {
     const cleanedPath = cleanPath(path);
     const normalPath = normalizePath(cleanedPath);
 
@@ -44,7 +48,7 @@ class Router {
     }
 
     this.#paths.set(normalPath, cleanedPath);
-    this.#routes.push([match(cleanedPath), handler]);
+    this.#routes.push([match(cleanedPath), handler as Handler<unknown>]);
     return this;
   }
 }
@@ -64,3 +68,14 @@ function normalizePath(path: string) {
 function cleanPath(path: string) {
   return path.replace(/\/$/, "").replace(/^([^/])/, "/$1");
 }
+
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types */
+export type PathParams<
+  T extends string,
+  Acc extends Record<string, string> = {},
+> = T extends `${infer _}/:${infer param}/${infer rest}`
+  ? PathParams<rest, Acc & { [key in param]: string }>
+  : T extends `${infer _}/:${infer param}`
+    ? Acc & { [key in param]: string }
+    : Acc;
+/* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types */

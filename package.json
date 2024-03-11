@@ -9,6 +9,7 @@
     "test": "vitest",
     "prepare": "husky",
     "router": "pnpm --filter router",
+    "test-utils": "pnpm --filter test-utils",
     "common": "pnpm --filter common"
   },
   "keywords": [],
