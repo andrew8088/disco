@@ -1,49 +1,7 @@
 import http from "http";
 import { expect, it, describe, beforeEach, afterEach } from "vitest";
 import { uturn } from "./uturn";
-import { deferred } from "@disco/common";
-
-function initContext() {
-  return {
-    meta: {
-      start: Date.now(),
-    },
-  };
-}
-
-function parseMethod<T>(req: http.IncomingMessage, _res: http.ServerResponse, ctx: T) {
-  switch (req.method) {
-    case "GET":
-      return { ...ctx, method: "GET" as const };
-    case "POST":
-      return { ...ctx, method: "POST" as const };
-    default:
-      throw "boom";
-  }
-}
-
-function parseUrl<T>(req: http.IncomingMessage, _res: http.ServerResponse, ctx: T) {
-  if (!req.url) {
-    throw "boom";
-  }
-
-  const url = new URL(req.url, `http://${req.headers.host}`);
-
-  return {
-    ...ctx,
-    url,
-  };
-}
-
-function parseBody<T>(req: http.IncomingMessage, _res: http.ServerResponse, ctx: T) {
-  const { promise, resolve } = deferred<T & { body: string }>();
-
-  let body = "";
-  req.on("data", (chunk) => (body += chunk.toString()));
-  req.on("end", () => resolve({ ...ctx, body }));
-
-  return promise;
-}
+import { parseBody, parseUrl, parseMethod } from "./middleware";
 
 describe("uturn", () => {
   let server: http.Server;
@@ -59,12 +17,12 @@ describe("uturn", () => {
 
   it("works", async () => {
     const app = uturn()
-      .use(initContext)
       .use(parseMethod)
       .use(parseUrl)
       .use(parseBody)
       .use(async (_req, res, ctx) => {
-        res.end(`${ctx.method} ${ctx.url.pathname}: ${ctx.body.toUpperCase()}`);
+        if (ctx.method !== "POST") throw "boom";
+        res.end(`${ctx.method} ${ctx.url.pathname}: ${ctx.body?.toUpperCase()}`);
       });
 
     server.on("request", app);
@@ -74,7 +32,6 @@ describe("uturn", () => {
 
   it("correctly types with early returns", async () => {
     const app = uturn()
-      .use(initContext)
       .use(parseMethod)
       .use(async (_req, _res, ctx) => {
         if (ctx.method !== "GET") return ctx;
@@ -95,6 +52,11 @@ describe("uturn", () => {
         };
       })
       .use(async (_req, res, ctx) => {
+        // actually, it's good we have to narrow further here: this means
+        // that the type sytstem knows we haven't provided a message for
+        // all the other HTTP methods;
+        if (ctx.method !== "GET" && ctx.method !== "POST") throw "boom";
+
         res.end(ctx.message);
         return ctx;
       });

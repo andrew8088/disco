@@ -1,7 +1,7 @@
 import { type IncomingMessage, type ServerResponse } from "http";
 
-type Req = IncomingMessage;
-type Res = ServerResponse;
+export type Req = IncomingMessage;
+export type Res = ServerResponse;
 
 type Handler<Ctx, NextCtx> = (req: Req, res: Res, ctx: Ctx) => NextCtx | PromiseLike<NextCtx>;
 
