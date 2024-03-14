@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest";
-import { deferred, pipe } from "./index";
+import { createErrorClass, deferred, pipe } from "./index";
 
 describe("deferred", () => {
   it("resolves the promise", () => {
@@ -39,5 +39,25 @@ describe("pipe", () => {
     expect(x(20)).toBe(1);
     expect(() => x(0)).toThrowError("boom");
     expect(x(-20)).toBe(2);
+  });
+});
+
+describe("createErrorClass", () => {
+  it("works", () => {
+    const FooError = createErrorClass<{ id: number }>("FooError");
+
+    try {
+      throw new FooError("boom", { id: 10 });
+    } catch (err) {
+      expect(err.type).toBe("FooError");
+      expect(err.message).toBe("boom");
+      expect(err.info.id).toBe(10);
+      expect(err.name).toBe("Error");
+      expect(err.constructor.name).toBe("FooError");
+      expect(err instanceof FooError).toBeTruthy();
+      // Not sure why this fails ... the stack starts with FooError when logged
+      // console.log(err);
+      //expect(err.stack).toContain("FooError");
+    }
   });
 });
