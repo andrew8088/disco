@@ -8,16 +8,18 @@ export async function getClientAndServer() {
 
   return [
     {
-      get(path: string) {
-        return fetch(`${baseUrl}${path}`);
+      get(path: string, options?: Omit<RequestInit, "method">) {
+        return fetch(`${baseUrl}${path}`, options);
       },
-      post(path: string) {
-        return fetch(`${baseUrl}${path}`, { method: "POST" });
+      post(path: string, options?: Omit<RequestInit, "method">) {
+        return fetch(`${baseUrl}${path}`, { method: "POST", ...options });
       },
     },
     server,
   ] as const;
 }
+
+export type TestHTTPClient = Awaited<ReturnType<typeof getClientAndServer>>[0];
 
 function getPort(server: http.Server) {
   const { promise, resolve, reject } = deferred<number>();
