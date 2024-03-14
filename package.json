@@ -7,10 +7,12 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest",
+    "test:all": "pnpm --filter \"./packages/*\" test",
     "prepare": "husky",
     "router": "pnpm --filter router",
     "test-utils": "pnpm --filter test-utils",
-    "common": "pnpm --filter common"
+    "common": "pnpm --filter common",
+    "uturn": "pnpm --filter uturn"
   },
   "keywords": [],
   "author": "",
