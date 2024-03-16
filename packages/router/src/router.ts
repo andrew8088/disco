@@ -1,7 +1,9 @@
-import { match } from "path-to-regexp";
 import type { Server } from "http";
 import { uturn, parseUrl, parseMethodAndBody, Res, Req } from "@disco/uturn";
-import { nameFn } from "@disco/common";
+import { createErrorClass, nameFn } from "@disco/common";
+import { PathParams, parseUrlToParams, cleanPath, normalizePath } from "./path";
+
+const [RouterError] = createErrorClass<{ existing: string; attempted: string }>("RouterError");
 
 type Handler<P> = (req: { params: P }) => [statusCode: number, body: unknown];
 
@@ -28,13 +30,7 @@ class Router {
 
   static fromServer(server: Server) {
     const r = new Router();
-    server.on("request", (req, res) =>
-      r.#uturn.use(() => {
-        res.statusCode = 404;
-        res.end("");
-        return undefined;
-      })(req, res, undefined),
-    );
+    server.on("request", (req, res) => r.#uturn.use(final404)(req, res, undefined));
     return r;
   }
 
@@ -42,9 +38,13 @@ class Router {
     const cleanedPath = cleanPath(path);
     const normalPath = normalizePath(cleanedPath);
     const key = `${method}_${normalPath}`;
+    const existing = this.#paths.get(key);
 
-    if (this.#paths.has(key)) {
-      throw new RouterError(`cannot register another handler for ${this.#paths.get(key)}`);
+    if (existing) {
+      throw new RouterError(`cannot register a handler for a path that has a handler`, {
+        existing,
+        attempted: cleanedPath,
+      });
     }
 
     this.#paths.set(key, cleanedPath);
@@ -53,11 +53,11 @@ class Router {
       nameFn(`${method}_`, path, (req: Req, res: Res, ctx) => {
         if (ctx.method !== method) return ctx;
 
-        const m = match(cleanedPath)(req.url ?? "");
+        const params = parseUrlToParams(cleanedPath, req.url);
+        if (!params) return ctx;
 
-        if (!m) return ctx;
+        const [statusCode, body] = handler({ params });
 
-        const [statusCode, body] = handler({ params: m.params as PathParams<Path> });
         res.statusCode = statusCode;
         if (body) {
           res.write(body);
@@ -79,29 +79,8 @@ class Router {
   }
 }
 
-class RouterError extends Error {
-  type = "RouterError" as const;
-
-  constructor(message: string) {
-    super(message);
-  }
+function final404(_req: Req, res: Res) {
+  res.statusCode = 404;
+  res.end("");
+  return undefined;
 }
-
-function normalizePath(path: string) {
-  return path.replaceAll(/:\w+/g, ":");
-}
-
-function cleanPath(path: string) {
-  return path.replace(/\/$/, "").replace(/^([^/])/, "/$1");
-}
-
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types */
-export type PathParams<
-  T extends string,
-  Acc extends Record<string, string> = {},
-> = T extends `${infer _}/:${infer param}/${infer rest}`
-  ? PathParams<rest, Acc & { [key in param]: string }>
-  : T extends `${infer _}/:${infer param}`
-    ? Acc & { [key in param]: string }
-    : Acc;
-/* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types */

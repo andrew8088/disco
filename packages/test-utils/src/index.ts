@@ -34,3 +34,11 @@ function getPort(server: http.Server) {
 
   return promise;
 }
+
+export async function getException(fn: (...args: never[]) => unknown) {
+  try {
+    await fn();
+  } catch (err) {
+    return err;
+  }
+}

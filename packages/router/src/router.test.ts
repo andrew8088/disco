@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest";
 import createRouter from "./router";
-import { getClientAndServer } from "@disco/test-utils";
+import { getClientAndServer, getException } from "@disco/test-utils";
 
 describe("router", () => {
   it("responds", async () => {
@@ -18,9 +18,13 @@ describe("router", () => {
 
     router.get("/hello", () => ok("hello"));
 
-    expect(() => {
-      router.get("/hello", () => ok("goodbye"));
-    }).toThrowError("cannot register another handler for /hello");
+    const err = await getException(() => router.get("/hello", () => ok("goodbye")));
+    expect(err.type).toEqual("RouterError");
+    expect(err.message).toEqual("cannot register a handler for a path that has a handler");
+    expect(err.info).toMatchObject({
+      existing: "/hello",
+      attempted: "/hello",
+    });
   });
 
   it("matches routes", async () => {
@@ -65,21 +69,13 @@ describe("router", () => {
 
     router.get("/user/:userId", () => ok("hello"));
 
-    expect(() => {
-      router.get("/user/:id", () => ok("hello"));
-    }).toThrowError("cannot register another handler for /user/:userId");
-  });
-
-  it("recognizes (and throws for) the same path with different token names", async () => {
-    const [, server] = await getClientAndServer();
-
-    const router = createRouter(server);
-
-    router.get("/user/:userId", () => ok("hello"));
-
-    expect(() => {
-      router.get("/user/:id", () => ok("hello"));
-    }).toThrowError("cannot register another handler for /user/:userId");
+    const err = await getException(() => router.get("/user/:id", () => ok("hello")));
+    expect(err.type).toEqual("RouterError");
+    expect(err.message).toEqual("cannot register a handler for a path that has a handler");
+    expect(err.info).toMatchObject({
+      existing: "/user/:userId",
+      attempted: "/user/:id",
+    });
   });
 
   it("matches the longest possible route", async () => {
