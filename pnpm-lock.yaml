@@ -65,6 +65,9 @@ importers:
       '@disco/test-utils':
         specifier: workspace:^
         version: link:../test-utils
+      '@disco/uturn':
+        specifier: workspace:^
+        version: link:../uturn
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.1
@@ -109,10 +112,10 @@ importers:
       '@disco/common':
         specifier: workspace:^
         version: link:../common
+    devDependencies:
       '@disco/test-utils':
         specifier: workspace:^
         version: link:../test-utils
-    devDependencies:
       typescript:
         specifier: ^5.4.2
         version: 5.4.2

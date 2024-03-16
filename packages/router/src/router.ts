@@ -1,5 +1,7 @@
-import { MatchFunction, match } from "path-to-regexp";
-import type { Server, IncomingMessage, ServerResponse } from "http";
+import { match } from "path-to-regexp";
+import type { Server } from "http";
+import { uturn, parseUrl, parseMethodAndBody, Res, Req } from "@disco/uturn";
+import { nameFn } from "@disco/common";
 
 type Handler<P> = (req: { params: P }) => [statusCode: number, body: unknown];
 
@@ -16,24 +18,9 @@ const HTTP_METHOD = {
 
 type Method = (typeof HTTP_METHOD)[keyof typeof HTTP_METHOD];
 
-function parseMethod(m: string | undefined): Method {
-  if (!!m && m.toLowerCase() in HTTP_METHOD) return m as Method;
-  else throw new ParserError(`${m} is not a support HTTP method (supported methods: ${Object.values(HTTP_METHOD)})`);
-}
-
 class Router {
-  #paths = {
-    [HTTP_METHOD.get]: new Map<string, string>(),
-    [HTTP_METHOD.post]: new Map<string, string>(),
-    [HTTP_METHOD.put]: new Map<string, string>(),
-    [HTTP_METHOD.delete]: new Map<string, string>(),
-  };
-  #routes: { [m in Method]: Array<[path: MatchFunction<object>, handler: Handler<unknown>]> } = {
-    [HTTP_METHOD.get]: [],
-    [HTTP_METHOD.post]: [],
-    [HTTP_METHOD.put]: [],
-    [HTTP_METHOD.delete]: [],
-  };
+  #paths = new Map<string, string>();
+  #uturn = uturn().use(parseUrl).use(parseMethodAndBody);
 
   static new() {
     return new Router();
@@ -41,39 +28,45 @@ class Router {
 
   static fromServer(server: Server) {
     const r = new Router();
-    server.on("request", (req, res) => r._handleRequest(req, res));
+    server.on("request", (req, res) =>
+      r.#uturn.use(() => {
+        res.statusCode = 404;
+        res.end("");
+        return undefined;
+      })(req, res, undefined),
+    );
     return r;
-  }
-
-  _handleRequest(req: IncomingMessage, res: ServerResponse) {
-    for (const [matchPath, handler] of this.#routes[parseMethod(req.method)]) {
-      const match = matchPath(req.url ?? "");
-
-      if (match) {
-        const [statusCode, body] = handler({ params: match.params });
-        res.statusCode = statusCode;
-        if (body) {
-          res.write(body);
-        }
-        res.end();
-        return;
-      }
-    }
-    res.statusCode = 404;
-    res.end();
   }
 
   register<Path extends string>(method: Method, path: Path, handler: Handler<PathParams<Path>>) {
     const cleanedPath = cleanPath(path);
     const normalPath = normalizePath(cleanedPath);
-    const methodPaths = this.#paths[method];
+    const key = `${method}_${normalPath}`;
 
-    if (methodPaths.has(normalPath)) {
-      throw new RouterError(`cannot register another handler for ${methodPaths.get(normalPath)}`);
+    if (this.#paths.has(key)) {
+      throw new RouterError(`cannot register another handler for ${this.#paths.get(key)}`);
     }
 
-    methodPaths.set(normalPath, cleanedPath);
-    this.#routes[method].push([match(cleanedPath), handler as Handler<unknown>]);
+    this.#paths.set(key, cleanedPath);
+
+    this.#uturn = this.#uturn.use(
+      nameFn(`${method}_`, path, (req: Req, res: Res, ctx) => {
+        if (ctx.method !== method) return ctx;
+
+        const m = match(cleanedPath)(req.url ?? "");
+
+        if (!m) return ctx;
+
+        const [statusCode, body] = handler({ params: m.params as PathParams<Path> });
+        res.statusCode = statusCode;
+        if (body) {
+          res.write(body);
+        }
+        res.end();
+        return ctx;
+      }),
+    );
+
     return this;
   }
 
@@ -88,14 +81,6 @@ class Router {
 
 class RouterError extends Error {
   type = "RouterError" as const;
-
-  constructor(message: string) {
-    super(message);
-  }
-}
-
-class ParserError extends Error {
-  type = "ParserError" as const;
 
   constructor(message: string) {
     super(message);
