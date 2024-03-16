@@ -1,8 +1,9 @@
 import { createErrorClass } from "@disco/common";
-import { Req, Res } from "./uturn";
+import { UturnResponse } from "./uturn";
 
-export const [UturnParseError] = createErrorClass<Req>("UturnParseError");
-export const [HttpResponseError] = createErrorClass<string>("HttpResponseError");
+type ErrCode = string;
+export const [UturnParseError] = createErrorClass("UturnParseError");
+export const [HttpResponseError] = createErrorClass<ErrCode>("HttpResponseError");
 
 export const [BadResponseError, BadResponse] = createErrorClass("BadResponseError", HttpResponseError);
 export const [UnauthorizedError, Unauthorized] = createErrorClass("UnauthorizedError", HttpResponseError);
@@ -30,7 +31,7 @@ export const StatusCodes: Record<string, number> = {
   NotFoundError: 404,
 };
 
-export function setErrorDetailsOnResponse(err: Error, res: Res) {
+export function setErrorDetailsOnResponse(err: Error, res: UturnResponse) {
   if (err instanceof HttpResponseError) {
     res.statusCode = StatusCodes[err.type] ?? 500;
     res.end(JSON.stringify({ message: err.message, info: err.info }));

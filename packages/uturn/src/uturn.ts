@@ -1,24 +1,27 @@
-import { type IncomingMessage, type ServerResponse } from "http";
+import { Writable } from "stream";
 import { setErrorDetailsOnResponse } from "./errors";
 import { nameFn } from "@disco/common";
 
-export type Req = IncomingMessage;
-export type Res = ServerResponse;
+export type UturnResponse = Writable & { statusCode: number };
 
-type Handler<Ctx, NextCtx> = (req: Req, res: Res, ctx: Ctx) => NextCtx | PromiseLike<NextCtx>;
+type Handler<Req, Res, Ctx, NextCtx> = (req: Req, res: Res, ctx: Ctx) => NextCtx | PromiseLike<NextCtx>;
 
-type Uturn<Ctx, NextCtx> = {
+type Uturn<Req, Res, Ctx, NextCtx> = {
   (req: Req, res: Res, ctx: Ctx): Promise<void>;
-  use<NextNextCtx>(fn2: Handler<NextCtx, NextNextCtx>): Uturn<Ctx, NextNextCtx>;
+  use<NextNextCtx>(fn2: Handler<Req, Res, NextCtx, NextNextCtx>): Uturn<Req, Res, Ctx, NextNextCtx>;
 };
 
-export function uturn() {
+export function uturn<Req, Res extends UturnResponse>() {
   return {
-    use: _uturn,
+    use<C, D>(fn: Handler<Req, Res, C, D>) {
+      return _uturn<Req, Res, C, D>(fn);
+    },
   };
 }
 
-function _uturn<Ctx, NextCtx>(next: Handler<Ctx, NextCtx>): Uturn<Ctx, NextCtx> {
+function _uturn<Req, Res extends UturnResponse, Ctx, NextCtx>(
+  next: Handler<Req, Res, Ctx, NextCtx>,
+): Uturn<Req, Res, Ctx, NextCtx> {
   async function app(req: Req, res: Res, ctx: Ctx) {
     try {
       await next(req, res, ctx);
@@ -32,7 +35,7 @@ function _uturn<Ctx, NextCtx>(next: Handler<Ctx, NextCtx>): Uturn<Ctx, NextCtx> 
   }
   nameFn("app_", next.name, app);
 
-  app.use = <NextNextCtx>(nextNext: Handler<NextCtx, NextNextCtx>) => {
+  app.use = <NextNextCtx>(nextNext: Handler<Req, Res, NextCtx, NextNextCtx>) => {
     return _uturn(
       nameFn("wrapper_", nextNext.name, async (req: Req, res: Res, ctx: Ctx) => {
         return nextNext(req, res, await next(req, res, ctx));

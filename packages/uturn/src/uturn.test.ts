@@ -79,7 +79,7 @@ describe("uturn", () => {
       res.end("unauthed route, no user");
     });
 
-    const app = uturn()
+    const app = uturn<http.IncomingMessage, http.ServerResponse>()
       .use((req) => {
         const id = req.headers["x-user-id"];
         if (id === "andrew") {
