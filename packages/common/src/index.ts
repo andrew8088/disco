@@ -22,7 +22,7 @@ export function pipe<A, B>(fn: (a: A) => B) {
   return run;
 }
 
-class ApplicationError<T = never> extends Error {
+class ApplicationError<T> extends Error {
   type = "ApplicationError";
   info: T;
 
@@ -32,15 +32,20 @@ class ApplicationError<T = never> extends Error {
   }
 }
 
-export function createErrorClass<T>(tag: string) {
-  const errClass = class extends ApplicationError<T> {
+export function createErrorClass<T>(tag: string, ParentError = ApplicationError<T>) {
+  const ErrClass = class extends ParentError {
+    static type = tag;
     type = tag;
   };
 
-  Object.defineProperty(errClass, "name", {
+  function createErrInstance(message: string, info: T) {
+    return new ErrClass(message, info);
+  }
+
+  Object.defineProperty(ErrClass, "name", {
     value: tag,
     writable: false,
   });
 
-  return errClass;
+  return [ErrClass, createErrInstance] as const;
 }

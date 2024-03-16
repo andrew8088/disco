@@ -44,7 +44,7 @@ describe("pipe", () => {
 
 describe("createErrorClass", () => {
   it("works", () => {
-    const FooError = createErrorClass<{ id: number }>("FooError");
+    const [FooError] = createErrorClass<{ id: number }>("FooError");
 
     try {
       throw new FooError("boom", { id: 10 });
