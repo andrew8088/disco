@@ -2,7 +2,7 @@ import http from "http";
 import { getClientAndServer, type TestHTTPClient } from "@disco/test-utils";
 import { expect, it, describe, beforeEach, afterEach } from "vitest";
 import { uturn } from "./uturn";
-import { parseBody, parseUrl, parseMethod } from "./middleware";
+import { parseMethodAndBody, parseUrl } from "./middleware";
 import { R } from "./errors";
 
 describe("uturn", () => {
@@ -22,9 +22,8 @@ describe("uturn", () => {
 
   it("works", async () => {
     const app = uturn()
-      .use(parseMethod)
       .use(parseUrl)
-      .use(parseBody)
+      .use(parseMethodAndBody)
       .use(async (_req, res, ctx) => {
         if (ctx.method !== "POST") throw "boom";
         res.end(`${ctx.method} ${ctx.url.pathname}: ${ctx.body?.toUpperCase()}`);
@@ -37,7 +36,7 @@ describe("uturn", () => {
 
   it("correctly types with early returns", async () => {
     const app = uturn()
-      .use(parseMethod)
+      .use(parseMethodAndBody)
       .use(async (_req, _res, ctx) => {
         if (ctx.method !== "GET") return ctx;
         return {
@@ -109,9 +108,8 @@ describe("uturn", () => {
 
   it("handles errors", async () => {
     const app = uturn()
-      .use(parseMethod)
       .use(parseUrl)
-      .use(parseBody)
+      .use(parseMethodAndBody)
       .use(function final(_req, res, ctx) {
         if (ctx.method === "GET") throw new Error("boom");
         res.end("success");

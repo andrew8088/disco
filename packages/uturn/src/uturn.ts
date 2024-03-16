@@ -1,5 +1,6 @@
 import { type IncomingMessage, type ServerResponse } from "http";
 import { setErrorDetailsOnResponse } from "./errors";
+import { nameFn } from "@disco/common";
 
 export type Req = IncomingMessage;
 export type Res = ServerResponse;
@@ -26,7 +27,7 @@ function _uturn<Ctx, NextCtx>(next: Handler<Ctx, NextCtx>): Uturn<Ctx, NextCtx> 
       return Promise.resolve({} as NextCtx);
     }
   }
-  nameFn("app_", app, next.name);
+  nameFn("app_", next.name, app);
 
   app.use = <NextNextCtx>(nextNext: Handler<NextCtx, NextNextCtx>) => {
     const wrapper = async (req: Req, res: Res, ctx: Ctx) => {
@@ -39,15 +40,10 @@ function _uturn<Ctx, NextCtx>(next: Handler<Ctx, NextCtx>): Uturn<Ctx, NextCtx> 
       }
     };
 
-    nameFn("wrapper_", wrapper, nextNext.name);
+    nameFn("wrapper_", nextNext.name, wrapper);
 
     return _uturn(wrapper);
   };
 
   return app;
-}
-
-function nameFn(tag: string, fn: (...args: never[]) => unknown, value: string | undefined) {
-  if (!value) return;
-  Object.defineProperty(fn, "name", { value: `${tag}${value}` });
 }

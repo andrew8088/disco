@@ -13,65 +13,43 @@ export function parseUrl<T>(req: Req, _res: Res, ctx: T) {
   };
 }
 
-const NO_BODY_METHODS = ["GET", "HEAD", "OPTIONS"] as const;
-type SupportedNoBodyMethod = (typeof NO_BODY_METHODS)[number];
-const BODY_METHODS = ["POST", "PUT", "PATCH", "DELETE"] as const;
-type SupportedBodyMethod = (typeof BODY_METHODS)[number];
-type SupportedMethod = SupportedNoBodyMethod | SupportedBodyMethod;
+const READ_METHODS = ["GET", "HEAD", "OPTIONS"] as const;
+type ReadMethod = (typeof READ_METHODS)[number];
+const WRITE_METHODS = ["POST", "PUT", "PATCH", "DELETE"] as const;
+type WriteMethod = (typeof WRITE_METHODS)[number];
+type SupportedMethod = ReadMethod | WriteMethod;
 
 function isSupportedMethod(method: string): method is SupportedMethod {
-  return (
-    NO_BODY_METHODS.includes(method as SupportedNoBodyMethod) || BODY_METHODS.includes(method as SupportedBodyMethod)
-  );
+  return READ_METHODS.includes(method as ReadMethod) || WRITE_METHODS.includes(method as WriteMethod);
 }
 
-function methodSupportsBody(method: SupportedMethod): method is SupportedBodyMethod {
-  return BODY_METHODS.includes(method as SupportedBodyMethod);
+function isWriteMethod(method: SupportedMethod): method is WriteMethod {
+  return WRITE_METHODS.includes(method as WriteMethod);
 }
 
-// this seems to be necessaary to allow method-based narrowing later: each method is its own union member.
-type ParseMethodContext<T, Method> = Method extends Method ? T & { method: Method } : never;
+type WithoutBody<T> = T extends T ? { method: T } : never;
+type WithBody<T> = T extends T ? { method: T; body: string } : never;
+type ParseBodyContext<T> = T & (WithoutBody<ReadMethod> | WithBody<WriteMethod>);
 
-export function parseMethod<T>(req: Req, _res: Res, ctx: T): ParseMethodContext<T, SupportedMethod> {
-  if (!req.method) {
+export function parseMethodAndBody<T>(req: Req, _res: Res, ctx: T): Promise<ParseBodyContext<T>> {
+  const { promise, resolve } = deferred<ParseBodyContext<T>>();
+
+  const { method } = req;
+
+  if (!method) {
     throw new UturnParseError("request has no method", req);
   }
 
-  if (isSupportedMethod(req.method)) {
-    return {
-      ...ctx,
-      method: req.method,
-    };
+  if (!isSupportedMethod(method)) {
+    throw new UturnParseError(`request has unsupported method: ${req.method}`, req);
   }
 
-  throw new UturnParseError(`request has unsupported method: ${req.method}`, req);
-}
-
-type ParseBodyContext<T> = T &
-  (
-    | {
-        method: SupportedNoBodyMethod;
-      }
-    | {
-        method: SupportedBodyMethod;
-        body: string;
-      }
-  );
-
-export function parseBody<T extends { method: SupportedMethod }>(
-  req: Req,
-  _res: Res,
-  ctx: T,
-): Promise<ParseBodyContext<T>> {
-  const { promise, resolve } = deferred<ParseBodyContext<T>>();
-  const { method } = ctx;
-
-  if (!methodSupportsBody(method)) {
+  if (!isWriteMethod(method)) {
     resolve({ ...ctx, method });
   } else {
     let body = "";
     req.on("data", (chunk) => (body += chunk.toString()));
-    req.on("end", () => resolve({ ...ctx, body }));
+    req.on("end", () => resolve({ ...ctx, method, body }));
   }
   return promise;
 }

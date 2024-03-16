@@ -49,3 +49,9 @@ export function createErrorClass<T>(tag: string, ParentError = ApplicationError<
 
   return [ErrClass, createErrInstance] as const;
 }
+
+export function nameFn<T extends (...args: never[]) => unknown>(prefix: string, name: string | undefined, fn: T): T {
+  if (!name) return fn;
+  Object.defineProperty(fn, "name", { value: `${prefix}${name}` });
+  return fn;
+}
