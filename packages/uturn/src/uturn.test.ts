@@ -1,13 +1,17 @@
 import http from "http";
+import { getClientAndServer, type TestHTTPClient } from "@disco/test-utils";
 import { expect, it, describe, beforeEach, afterEach } from "vitest";
 import { uturn } from "./uturn";
 import { parseBody, parseUrl, parseMethod } from "./middleware";
 
 describe("uturn", () => {
   let server: http.Server;
+  let client: TestHTTPClient;
 
-  beforeEach(() => {
-    server = http.createServer().listen(3000);
+  const toText = (r: Response) => r.text();
+
+  beforeEach(async () => {
+    [client, server] = await getClientAndServer();
   });
 
   afterEach(() => {
@@ -26,7 +30,7 @@ describe("uturn", () => {
       });
 
     server.on("request", app);
-    const body = await fetch("http://localhost:3000/hello", { method: "POST", body: "andrew" }).then((r) => r.text());
+    const body = await client.post("/hello", { body: "andrew" }).then(toText);
     expect(body).toEqual("POST /hello: ANDREW");
   });
 
@@ -62,16 +66,16 @@ describe("uturn", () => {
       });
 
     server.on("request", app);
-    const body = await fetch("http://localhost:3000", { method: "POST", body: "andrew" }).then((r) => r.text());
+    const body = await client.post("/hello", { body: "andrew" }).then(toText);
     expect(body).toEqual("this is a post");
   });
 
   it("composes partial apps", async () => {
-    const authedRoutes = uturn<{ user: { id: string } }>().use((_req, res, ctx) => {
+    const authedRoutes = uturn().use((_req, res, ctx: { user: { id: string } }) => {
       res.end(`authed route, user is ${ctx?.user.id}`);
     });
 
-    const unauthedRoutes = uturn<{ authed: false }>().use((_req, res) => {
+    const unauthedRoutes = uturn().use((_req, res) => {
       res.end("unauthed route, no user");
     });
 
@@ -95,10 +99,26 @@ describe("uturn", () => {
       });
 
     server.on("request", app);
-    const body1 = await fetch("http://localhost:3000", { headers: { "x-user-id": "andrew" } }).then((r) => r.text());
+    const body1 = await client.get("/", { headers: { "x-user-id": "andrew" } }).then(toText);
     expect(body1).toEqual("authed route, user is andrew");
 
-    const body2 = await fetch("http://localhost:3000").then((r) => r.text());
+    const body2 = await client.get("/").then(toText);
     expect(body2).toEqual("unauthed route, no user");
+  });
+
+  it("handles errors", async () => {
+    const app = uturn()
+      .use(parseMethod)
+      .use(parseUrl)
+      .use(parseBody)
+      .use(function final(_req, res, ctx) {
+        if (ctx.method === "GET") throw new Error("boom");
+        res.end("success");
+      });
+
+    server.on("request", app);
+    const res = await client.get("/");
+    expect(res.status).toEqual(500);
+    expect(await res.text()).toEqual("boom");
   });
 });
