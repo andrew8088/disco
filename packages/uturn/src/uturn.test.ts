@@ -3,6 +3,7 @@ import { getClientAndServer, type TestHTTPClient } from "@disco/test-utils";
 import { expect, it, describe, beforeEach, afterEach } from "vitest";
 import { uturn } from "./uturn";
 import { parseBody, parseUrl, parseMethod } from "./middleware";
+import { R } from "./errors";
 
 describe("uturn", () => {
   let server: http.Server;
@@ -120,5 +121,24 @@ describe("uturn", () => {
     const res = await client.get("/");
     expect(res.status).toEqual(500);
     expect(await res.text()).toEqual("boom");
+  });
+
+  it.each([
+    [R.BadResponse, 400],
+    [R.Unauthorized, 401],
+    [R.Forbidden, 403],
+    [R.NotFound, 404],
+  ])("handles %s errors", async (errorCreator, statusCode) => {
+    const app = uturn().use(() => {
+      throw errorCreator("message", "ERR_CODE");
+    });
+
+    server.on("request", app);
+    const res = await client.get("/");
+    expect(await res.json()).toMatchObject({
+      message: "message",
+      info: "ERR_CODE",
+    });
+    expect(res.status).toEqual(statusCode);
   });
 });

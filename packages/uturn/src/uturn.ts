@@ -1,4 +1,5 @@
 import { type IncomingMessage, type ServerResponse } from "http";
+import { setErrorDetailsOnResponse } from "./errors";
 
 export type Req = IncomingMessage;
 export type Res = ServerResponse;
@@ -18,7 +19,12 @@ export function uturn() {
 
 function _uturn<Ctx, NextCtx>(next: Handler<Ctx, NextCtx>): Uturn<Ctx, NextCtx> {
   function app(req: Req, res: Res, ctx: Ctx) {
-    return next(req, res, ctx);
+    try {
+      return next(req, res, ctx);
+    } catch (err) {
+      setErrorDetailsOnResponse(err, res);
+      return Promise.resolve({} as NextCtx);
+    }
   }
   nameFn("app_", app, next.name);
 
@@ -28,8 +34,7 @@ function _uturn<Ctx, NextCtx>(next: Handler<Ctx, NextCtx>): Uturn<Ctx, NextCtx> 
         const nextCtx = await next(req, res, ctx);
         return nextNext(req, res, nextCtx);
       } catch (err) {
-        res.statusCode = 500;
-        res.end(err.message);
+        setErrorDetailsOnResponse(err, res);
         return Promise.resolve({} as NextNextCtx);
       }
     };
