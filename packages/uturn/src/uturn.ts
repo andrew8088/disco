@@ -8,7 +8,7 @@ export type Res = ServerResponse;
 type Handler<Ctx, NextCtx> = (req: Req, res: Res, ctx: Ctx) => NextCtx | PromiseLike<NextCtx>;
 
 type Uturn<Ctx, NextCtx> = {
-  (req: Req, res: Res, ctx: Ctx): NextCtx | PromiseLike<NextCtx>;
+  (req: Req, res: Res, ctx: Ctx): Promise<void>;
   use<NextNextCtx>(fn2: Handler<NextCtx, NextNextCtx>): Uturn<Ctx, NextNextCtx>;
 };
 
@@ -19,30 +19,25 @@ export function uturn() {
 }
 
 function _uturn<Ctx, NextCtx>(next: Handler<Ctx, NextCtx>): Uturn<Ctx, NextCtx> {
-  function app(req: Req, res: Res, ctx: Ctx) {
+  async function app(req: Req, res: Res, ctx: Ctx) {
     try {
-      return next(req, res, ctx);
+      await next(req, res, ctx);
+
+      if (!res.writableFinished) {
+        throw new Error();
+      }
     } catch (err) {
       setErrorDetailsOnResponse(err, res);
-      return Promise.resolve({} as NextCtx);
     }
   }
   nameFn("app_", next.name, app);
 
   app.use = <NextNextCtx>(nextNext: Handler<NextCtx, NextNextCtx>) => {
-    const wrapper = async (req: Req, res: Res, ctx: Ctx) => {
-      try {
-        const nextCtx = await next(req, res, ctx);
-        return nextNext(req, res, nextCtx);
-      } catch (err) {
-        setErrorDetailsOnResponse(err, res);
-        return Promise.resolve({} as NextNextCtx);
-      }
-    };
-
-    nameFn("wrapper_", nextNext.name, wrapper);
-
-    return _uturn(wrapper);
+    return _uturn(
+      nameFn("wrapper_", nextNext.name, async (req: Req, res: Res, ctx: Ctx) => {
+        return nextNext(req, res, await next(req, res, ctx));
+      }),
+    );
   };
 
   return app;

@@ -118,7 +118,7 @@ describe("uturn", () => {
     server.on("request", app);
     const res = await client.get("/");
     expect(res.status).toEqual(500);
-    expect(await res.text()).toEqual("boom");
+    expect(await res.text()).toEqual("");
   });
 
   it.each([
@@ -138,5 +138,22 @@ describe("uturn", () => {
       info: "ERR_CODE",
     });
     expect(res.status).toEqual(statusCode);
+  });
+
+  it("throws if the response is never finished", async () => {
+    const app = uturn()
+      .use(parseUrl)
+      .use(parseMethodAndBody)
+      .use(function final(_req, _res, ctx) {
+        return {
+          ...ctx,
+          more: true,
+        };
+      });
+
+    server.on("request", app);
+    const res = await client.get("/");
+    expect(res.status).toEqual(500);
+    expect(await res.text()).toEqual("");
   });
 });

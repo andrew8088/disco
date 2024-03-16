@@ -47,9 +47,9 @@ export function parseMethodAndBody<T>(req: Req, _res: Res, ctx: T): Promise<Pars
   if (!isWriteMethod(method)) {
     resolve({ ...ctx, method });
   } else {
-    let body = "";
-    req.on("data", (chunk) => (body += chunk.toString()));
-    req.on("end", () => resolve({ ...ctx, method, body }));
+    const body: Uint8Array[] = [];
+    req.on("data", (chunk) => body.push(chunk));
+    req.on("end", () => resolve({ ...ctx, method, body: Buffer.concat(body).toString() }));
   }
   return promise;
 }

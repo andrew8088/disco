@@ -36,6 +36,6 @@ export function setErrorDetailsOnResponse(err: Error, res: Res) {
     res.end(JSON.stringify({ message: err.message, info: err.info }));
   } else {
     res.statusCode = 500;
-    res.end(err.message);
+    res.end();
   }
 }
