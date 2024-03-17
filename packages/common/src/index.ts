@@ -48,9 +48,9 @@ export function createErrorClass<T>(tag: string, ParentError = ApplicationError<
   return [ErrClass, createErrInstance] as const;
 }
 
-export function nameFn<T extends (...args: never[]) => unknown>(prefix: string, name: string | undefined, fn: T): T {
+export function nameFn<T extends (...args: never[]) => unknown>(name: string | undefined, fn: T): T {
   if (!name) return fn;
-  defineName(fn, `${prefix}${name}`);
+  defineName(fn, name);
   return fn;
 }
 

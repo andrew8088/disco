@@ -2,7 +2,7 @@ import http from "http";
 import { getClientAndServer, type TestHTTPClient } from "@disco/test-utils";
 import { expect, it, describe, beforeEach, afterEach } from "vitest";
 import { uturn } from "./uturn";
-import { parseMethodAndBody, parseUrl } from "./middleware";
+import { parseMethodAndBody, parseUrl, handleErrors } from "./middleware";
 import { R } from "./errors";
 
 describe("uturn", () => {
@@ -21,7 +21,7 @@ describe("uturn", () => {
   });
 
   it("works", async () => {
-    const app = uturn()
+    const app = uturn<http.IncomingMessage, http.ServerResponse>()
       .use(parseUrl)
       .use(parseMethodAndBody)
       .use(async (_req, res, ctx) => {
@@ -29,13 +29,13 @@ describe("uturn", () => {
         res.end(`${ctx.method} ${ctx.url.pathname}: ${ctx.body?.toUpperCase()}`);
       });
 
-    server.on("request", app);
+    server.on("request", handleErrors(app));
     const body = await client.post("/hello", { body: "andrew" }).then(toText);
     expect(body).toEqual("POST /hello: ANDREW");
   });
 
   it("correctly types with early returns", async () => {
-    const app = uturn()
+    const app = uturn<http.IncomingMessage, http.ServerResponse>()
       .use(parseMethodAndBody)
       .use(async (_req, _res, ctx) => {
         if (ctx.method !== "GET") return ctx;
@@ -62,20 +62,21 @@ describe("uturn", () => {
         if (ctx.method !== "GET" && ctx.method !== "POST") throw "boom";
 
         res.end(ctx.message);
-        return ctx;
       });
 
-    server.on("request", app);
+    server.on("request", handleErrors(app));
     const body = await client.post("/hello", { body: "andrew" }).then(toText);
     expect(body).toEqual("this is a post");
   });
 
   it("composes partial apps", async () => {
-    const authedRoutes = uturn().use((_req, res, ctx: { user: { id: string } }) => {
-      res.end(`authed route, user is ${ctx?.user.id}`);
-    });
+    const authedRoutes = uturn<http.IncomingMessage, http.ServerResponse>().use(
+      (_req, res, ctx: { user: { id: string } }) => {
+        res.end(`authed route, user is ${ctx?.user.id}`);
+      },
+    );
 
-    const unauthedRoutes = uturn().use((_req, res) => {
+    const unauthedRoutes = uturn<http.IncomingMessage, http.ServerResponse>().use((_req, res) => {
       res.end("unauthed route, no user");
     });
 
@@ -98,7 +99,7 @@ describe("uturn", () => {
         return unauthedRoutes(req, res, ctx);
       });
 
-    server.on("request", app);
+    server.on("request", handleErrors(app));
     const body1 = await client.get("/", { headers: { "x-user-id": "andrew" } }).then(toText);
     expect(body1).toEqual("authed route, user is andrew");
 
@@ -107,7 +108,7 @@ describe("uturn", () => {
   });
 
   it("handles errors", async () => {
-    const app = uturn()
+    const app = uturn<http.IncomingMessage, http.ServerResponse>()
       .use(parseUrl)
       .use(parseMethodAndBody)
       .use(function final(_req, res, ctx) {
@@ -115,7 +116,7 @@ describe("uturn", () => {
         res.end("success");
       });
 
-    server.on("request", app);
+    server.on("request", handleErrors(app));
     const res = await client.get("/");
     expect(res.status).toEqual(500);
     expect(await res.text()).toEqual("");
@@ -127,11 +128,11 @@ describe("uturn", () => {
     [R.Forbidden, 403],
     [R.NotFound, 404],
   ])("handles %s errors", async (errorCreator, statusCode) => {
-    const app = uturn().use(() => {
+    const app = uturn<http.IncomingMessage, http.ServerResponse>().use(() => {
       throw errorCreator("message", "ERR_CODE");
     });
 
-    server.on("request", app);
+    server.on("request", handleErrors(app));
     const res = await client.get("/");
     expect(await res.json()).toMatchObject({
       message: "message",
@@ -141,17 +142,12 @@ describe("uturn", () => {
   });
 
   it("throws if the response is never finished", async () => {
-    const app = uturn()
+    const app = uturn<http.IncomingMessage, http.ServerResponse>()
       .use(parseUrl)
       .use(parseMethodAndBody)
-      .use(function final(_req, _res, ctx) {
-        return {
-          ...ctx,
-          more: true,
-        };
-      });
+      .use(() => {});
 
-    server.on("request", app);
+    server.on("request", handleErrors(app));
     const res = await client.get("/");
     expect(res.status).toEqual(500);
     expect(await res.text()).toEqual("");

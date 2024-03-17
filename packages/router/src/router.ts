@@ -1,5 +1,5 @@
-import type { Server } from "http";
-import { uturn, parseUrl, parseMethodAndBody, Res, Req } from "@disco/uturn";
+import type { Server, IncomingMessage, ServerResponse } from "http";
+import { uturn, parseUrl, parseMethodAndBody } from "@disco/uturn";
 import { createErrorClass, nameFn } from "@disco/common";
 import { PathParams, parseUrlToParams, cleanPath, normalizePath } from "./path";
 
@@ -22,7 +22,7 @@ type Method = (typeof HTTP_METHOD)[keyof typeof HTTP_METHOD];
 
 class Router {
   #paths = new Map<string, string>();
-  #uturn = uturn().use(parseUrl).use(parseMethodAndBody);
+  #uturn = uturn<IncomingMessage, ServerResponse>().use(parseUrl).use(parseMethodAndBody);
 
   static new() {
     return new Router();
@@ -50,7 +50,7 @@ class Router {
     this.#paths.set(key, cleanedPath);
 
     this.#uturn = this.#uturn.use(
-      nameFn(`${method}_`, path, (req: Req, res: Res, ctx) => {
+      nameFn(`${method}_${path}`, (req: IncomingMessage, res: ServerResponse, ctx) => {
         if (ctx.method !== method) return ctx;
 
         const params = parseUrlToParams(cleanedPath, req.url);
@@ -79,7 +79,7 @@ class Router {
   }
 }
 
-function final404(_req: Req, res: Res) {
+function final404<T>(_req: T, res: ServerResponse) {
   res.statusCode = 404;
   res.end("");
   return undefined;
