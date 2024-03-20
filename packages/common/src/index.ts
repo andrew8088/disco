@@ -22,6 +22,16 @@ export function pipe<A, B>(fn: (a: A) => B) {
   return run;
 }
 
+export function pipeAsync<A, B>(fn: (a: A) => Promise<B>) {
+  function run(a: A) {
+    return fn(a);
+  }
+
+  run.pipe = <C>(fn2: (b: B) => Promise<C>) => pipeAsync((a: A) => fn(a).then(fn2));
+
+  return run;
+}
+
 class ApplicationError<T> extends Error {
   type = "ApplicationError";
   info: T;

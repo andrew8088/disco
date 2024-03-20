@@ -1,5 +1,6 @@
+import { setTimeout } from "node:timers/promises";
 import { it, expect, describe } from "vitest";
-import { createErrorClass, deferred, pipe } from "./index";
+import { createErrorClass, deferred, pipe, pipeAsync } from "./index";
 
 describe("deferred", () => {
   it("resolves the promise", () => {
@@ -39,6 +40,22 @@ describe("pipe", () => {
     expect(x(20)).toBe(1);
     expect(() => x(0)).toThrowError("boom");
     expect(x(-20)).toBe(2);
+  });
+});
+
+describe("pipeAsync", () => {
+  it("works", async () => {
+    const fn = pipeAsync((ms: number) =>
+      setTimeout(
+        ms,
+        Array(20 - ms)
+          .fill("a")
+          .join(""),
+      ),
+    ).pipe(async (x) => x.length);
+
+    expect(await fn(0)).toBe(20);
+    expect(await fn(1)).toBe(19);
   });
 });
 
