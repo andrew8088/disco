@@ -1,7 +1,8 @@
 import { deferred } from "@disco/common";
 import { UturnParseError, setErrorDetailsOnResponse } from "./errors";
 import { IncomingMessage } from "http";
-import { type UturnResponse, type Uturn } from "./uturn";
+import { Writable } from "stream";
+import { type Uturn } from "./uturn";
 
 export function parseUrl<Req extends IncomingMessage, Res, T>(req: Req, _res: Res, ctx: T) {
   if (!req.url) {
@@ -59,7 +60,7 @@ export function parseMethodAndBody<Req extends IncomingMessage, Res, T>(
   return promise;
 }
 
-export function handleErrors<Req, Res extends UturnResponse>(app: Uturn<Req, Res, void, void>) {
+export function handleErrors<Req, Res extends Writable & { statusCode: number }>(app: Uturn<Req, Res, void, void>) {
   return async function handleUturnErrors(req: Req, res: Res) {
     try {
       await app(req, res);
