@@ -12,7 +12,8 @@
     "router": "pnpm --filter router",
     "test-utils": "pnpm --filter test-utils",
     "common": "pnpm --filter common",
-    "uturn": "pnpm --filter uturn"
+    "uturn": "pnpm --filter uturn",
+    "new": "./bin/create-package.sh"
   },
   "keywords": [],
   "author": "",
