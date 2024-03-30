@@ -1,8 +1,8 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
-export default function createConfig(root: string) {
+export default function createConfig(root: string, plugins: PluginOption[] = []) {
   return defineConfig({
     build: {
       lib: {
@@ -12,6 +12,6 @@ export default function createConfig(root: string) {
         fileName: "index",
       },
     },
-    plugins: [dts()],
+    plugins: [dts(), ...plugins],
   });
 }

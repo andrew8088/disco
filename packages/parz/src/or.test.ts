@@ -1,0 +1,23 @@
+import { describe, it, expect } from "vitest";
+import { getException } from "./test-utils";
+
+import string from "./string";
+import number from "./number";
+import or from "./or";
+
+describe("or", () => {
+  const schema = or([string(), number()]);
+
+  it("works", () => {
+    expect(schema.parse("hello")).toBe("hello");
+    expect(schema.parse(42)).toBe(42);
+  });
+
+  it("throws", () => {
+    const err = getException(() => schema.parse(true));
+
+    expect(err.errors).toHaveLength(2);
+    expect(err.errors).toContain("value `true` is not a string");
+    expect(err.errors).toContain("value `true` is not a number");
+  });
+});
