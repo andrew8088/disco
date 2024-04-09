@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getException } from "./test-utils";
+import { getExceptionSync } from "@disco/test-utils";
 
 import string from "./string";
 
@@ -9,7 +9,7 @@ describe("string", () => {
   });
 
   it("throws for non-string", () => {
-    const err = getException(() => string().parse(42));
+    const err = getExceptionSync(() => string().parse(42));
     expect(err.message).toBe("value `42` is not a string");
   });
 

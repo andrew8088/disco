@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getException } from "./test-utils";
+import { getExceptionSync } from "@disco/test-utils";
 
 import object from "./object";
 import string from "./string";
@@ -19,7 +19,7 @@ describe("and", () => {
   });
 
   it("throws", () => {
-    const err = getException(() => schema.parse({ age: "42" }));
+    const err = getExceptionSync(() => schema.parse({ age: "42" }));
 
     expect(err.errors).toHaveLength(2);
     expect(err.errors).toContain("key `name` is missing");

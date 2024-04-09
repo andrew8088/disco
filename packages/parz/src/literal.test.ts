@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getException } from "./test-utils";
+import { getExceptionSync } from "@disco/test-utils";
 
 import literal from "./literal";
 
@@ -15,7 +15,7 @@ describe("literal", () => {
   });
 
   it("throws for other values", () => {
-    const err = getException(() => literal("42").parse(42));
+    const err = getExceptionSync(() => literal("42").parse(42));
     expect(err.message).toBe('value `42` is not "42"');
   });
 

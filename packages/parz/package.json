@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@disco/common": "workspace:^",
+    "@disco/test-utils": "workspace:^",
     "@faker-js/faker": "^8.4.1"
   }
 }

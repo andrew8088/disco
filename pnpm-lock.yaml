@@ -112,6 +112,9 @@ importers:
       '@disco/common':
         specifier: workspace:^
         version: link:../common
+      '@disco/test-utils':
+        specifier: workspace:^
+        version: link:../test-utils
       '@faker-js/faker':
         specifier: ^8.4.1
         version: 8.4.1

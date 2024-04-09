@@ -35,6 +35,14 @@ function getPort(server: http.Server) {
   return promise;
 }
 
+export function getExceptionSync(fn: (...args: never[]) => unknown) {
+  try {
+    fn();
+  } catch (err) {
+    return err;
+  }
+}
+
 export async function getException(fn: (...args: never[]) => unknown) {
   try {
     await fn();

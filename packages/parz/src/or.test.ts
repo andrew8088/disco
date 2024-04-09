@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getException } from "./test-utils";
+import { getExceptionSync } from "@disco/test-utils";
 
 import string from "./string";
 import number from "./number";
@@ -14,7 +14,7 @@ describe("or", () => {
   });
 
   it("throws", () => {
-    const err = getException(() => schema.parse(true));
+    const err = getExceptionSync(() => schema.parse(true));
 
     expect(err.errors).toHaveLength(2);
     expect(err.errors).toContain("value `true` is not a string");

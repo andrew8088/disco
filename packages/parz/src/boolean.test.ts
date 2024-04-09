@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getException } from "./test-utils";
+import { getExceptionSync } from "@disco/test-utils";
 
 import boolean from "./boolean";
 
@@ -9,7 +9,7 @@ describe("boolean", () => {
   });
 
   it("throws for non-boolean", () => {
-    const err = getException(() => boolean().parse("true"));
+    const err = getExceptionSync(() => boolean().parse("true"));
     expect(err.message).toBe('value `"true"` is not a boolean');
   });
 

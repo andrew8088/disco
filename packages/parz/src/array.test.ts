@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getException } from "./test-utils";
+import { getExceptionSync } from "@disco/test-utils";
 
 import or from "./or";
 import array from "./array";
@@ -18,12 +18,12 @@ describe("array", () => {
   });
 
   it("throws for non-arrays", () => {
-    const err = getException(() => schema.parse({}));
+    const err = getExceptionSync(() => schema.parse({}));
     expect(err.errors).toContain("value `{}` is not an array");
   });
 
   it("throws", () => {
-    const err = getException(() => schema.parse(["c"]));
+    const err = getExceptionSync(() => schema.parse(["c"]));
     expect(err.errors).toContain('index `0`: value `"c"` is not "a"');
     expect(err.errors).toContain('index `0`: value `"c"` is not "b"');
   });
@@ -39,7 +39,7 @@ describe("array", () => {
       ]),
     );
 
-    const err = getException(() => schema.parse([{}, undefined]));
+    const err = getExceptionSync(() => schema.parse([{}, undefined]));
     expect(err.errors).toHaveLength(5);
     expect(err.errors).toContain("index `0`: key `name` is missing");
     expect(err.errors).toContain("index `0`: key `age` is missing");

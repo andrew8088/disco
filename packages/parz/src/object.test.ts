@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getException } from "./test-utils";
+import { getExceptionSync } from "@disco/test-utils";
 
 import object from "./object";
 import string from "./string";
@@ -33,22 +33,22 @@ describe("object", () => {
   });
 
   it.each([["string"], [42], [true], [undefined], [null], [[]]])("throws for %p", (value) => {
-    const err = getException(() => schema.parse(value));
+    const err = getExceptionSync(() => schema.parse(value));
     expect(err.errors[0]).toBe(`value \`${JSON.stringify(value)}\` is not an object`);
   });
 
   it("throws for object with missing key", () => {
-    const err = getException(() => schema.parse({ name: "Deep Thought" }));
+    const err = getExceptionSync(() => schema.parse({ name: "Deep Thought" }));
     expect(err.errors[0]).toBe("key `age` is missing");
   });
 
   it("throws for object with wrongly-typed key", () => {
-    const err = getException(() => schema.parse({ name: "Deep Thought", age: "42" }));
+    const err = getExceptionSync(() => schema.parse({ name: "Deep Thought", age: "42" }));
     expect(err.errors[0]).toBe('key `age`: value `"42"` is not a number');
   });
 
   it("throws for object with multiple wrongly-typed keys", () => {
-    const err = getException(() => schema.parse({ name: 42, age: "42" }));
+    const err = getExceptionSync(() => schema.parse({ name: 42, age: "42" }));
     expect(err.errors).toHaveLength(2);
     expect(err.errors).toContain('key `age`: value `"42"` is not a number');
     expect(err.errors).toContain("key `name`: value `42` is not a string");
@@ -93,7 +93,7 @@ describe("object", () => {
       }),
     });
 
-    const err = getException(() =>
+    const err = getExceptionSync(() =>
       schema.parse({
         name: "Deep Thought",
         address: {
@@ -118,7 +118,7 @@ describe("object", () => {
       }),
     });
 
-    const err = getException(() =>
+    const err = getExceptionSync(() =>
       schema.parse({
         one: {
           two: {
