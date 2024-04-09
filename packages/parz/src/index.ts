@@ -7,3 +7,4 @@ export { default as object } from "./object";
 export { default as array } from "./array";
 export { default as and } from "./and";
 export { default as or } from "./or";
+export type { Parz } from "./types";
