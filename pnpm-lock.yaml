@@ -81,6 +81,9 @@ importers:
       '@disco/common':
         specifier: workspace:^
         version: link:../common
+      '@disco/test-utils':
+        specifier: workspace:^
+        version: link:../test-utils
       hookable:
         specifier: ^5.5.3
         version: 5.5.3

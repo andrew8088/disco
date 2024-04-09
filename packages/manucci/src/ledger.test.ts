@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Ledger } from "./ledger";
 import { Account } from "./manucci";
+import { captureCallbackArgs } from "@disco/test-utils";
 
 describe("manucci", () => {
   it("works for simple transactions", () => {
@@ -39,21 +40,12 @@ describe("manucci", () => {
   it("emits new account events", async () => {
     const ledger = new Ledger();
 
-    const p = new Promise<string[]>((resolve) => {
-      const accountNames: string[] = [];
+    const { callback, promise } = captureCallbackArgs<Account>((_, arr) => arr.length === 2);
 
-      ledger.hook("account:create", (account: Account) => {
-        accountNames.push(account.name);
-
-        if (accountNames.length === 2) {
-          resolve(accountNames);
-        }
-      });
-    });
-
+    ledger.hook("account:create", callback);
     ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
 
-    const accountNames = await p;
+    const accountNames = (await promise).map((a) => a.name);
 
     expect(accountNames).toContain("Alice");
     expect(accountNames).toContain("Bob");

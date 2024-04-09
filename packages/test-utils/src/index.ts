@@ -42,3 +42,19 @@ export async function getException(fn: (...args: never[]) => unknown) {
     return err;
   }
 }
+
+export function captureCallbackArgs<T>(until: (t: T, ts: T[]) => boolean) {
+  const { promise, resolve } = deferred<T[]>();
+  const values: T[] = [];
+
+  return {
+    callback(t: T) {
+      values.push(t);
+
+      if (until(t, values)) {
+        resolve(values);
+      }
+    },
+    promise,
+  };
+}
