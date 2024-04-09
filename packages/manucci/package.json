@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@disco/common": "workspace:^",
+    "hookable": "^5.5.3",
     "uuid": "^9.0.1"
   }
 }

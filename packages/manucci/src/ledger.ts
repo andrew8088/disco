@@ -1,3 +1,4 @@
+import { Hookable } from "hookable";
 import { AccountId, LedgerId, TransactionId } from "./id";
 import { Transaction } from "./manucci";
 
@@ -15,12 +16,13 @@ type ComplexTransaction = (
     }
 )[];
 
-export class Ledger {
+export class Ledger extends Hookable {
   ledgerId: LedgerId;
   transactions: Transaction[] = [];
   accounts = new Map<string, AccountId>();
 
   constructor() {
+    super();
     this.ledgerId = LedgerId();
   }
 
@@ -86,8 +88,20 @@ export class Ledger {
   }
 
   #getAccountId(name: string) {
-    const id = this.accounts.get(name) || this.accounts.set(name, AccountId()).get(name);
-    if (!id) throw new Error("Could not get account id");
-    return id;
+    const id = this.accounts.get(name);
+
+    if (id) {
+      return id;
+    }
+
+    const accountId = AccountId();
+    this.accounts.set(name, accountId);
+
+    this.callHook("account:create", {
+      accountId,
+      name,
+    });
+
+    return accountId;
   }
 }

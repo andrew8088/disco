@@ -12,7 +12,7 @@ function createId<const P extends string, const N extends string>(prefix: P, _na
   idCharSet.add(prefix);
 
   function create(): Brand<P, N> {
-    return `${prefix}${uuid()}` as never;
+    return `${prefix}:${uuid()}` as never;
   }
 
   create.parse = function parse(id: string): Brand<P, N> {

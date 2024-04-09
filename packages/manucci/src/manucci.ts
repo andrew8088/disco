@@ -1,7 +1,7 @@
-import { LedgerId } from "./id";
+import { AccountId, LedgerId } from "./id";
 
-type Account = {
-  accountId: `a${string}`;
+export type Account = {
+  accountId: AccountId;
   name: string;
 };
 
