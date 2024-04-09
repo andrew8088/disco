@@ -44,12 +44,15 @@ export class Ledger extends Hookable {
         }
       });
 
-      this.transactions.push({
+      const trx = {
         ledgerId: this.ledgerId,
         transactionId: TransactionId(),
         entries,
         createdAt: new Date(),
-      });
+      };
+
+      this.callHook("transaction:create", trx);
+      this.transactions.push(trx);
     } else {
       const entry1 = {
         value: 0 - transaction.amount,
@@ -63,12 +66,15 @@ export class Ledger extends Hookable {
         note: "",
       };
 
-      this.transactions.push({
+      const trx = {
         ledgerId: this.ledgerId,
         transactionId: TransactionId(),
         entries: [entry1, entry2],
         createdAt: new Date(),
-      });
+      };
+
+      this.callHook("transaction:create", trx);
+      this.transactions.push(trx);
     }
     return this;
   }
