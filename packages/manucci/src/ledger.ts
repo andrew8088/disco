@@ -1,11 +1,13 @@
 import { Hookable } from "hookable";
-import { AccountId, LedgerId, TransactionId } from "./id";
+import { AccountId, EntryId, LedgerId, TransactionId } from "./id";
 import {
   Account,
   Transaction,
   TransactionCreatePayload,
   SimpleTransactionCreatePayload,
   ComplexTransactionCreatePayload,
+  Entry,
+  TransactionRow,
 } from "./types";
 
 export type LedgerHooks = {
@@ -16,8 +18,8 @@ export type LedgerHooks = {
 
 export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHooks[K]) => void }> {
   ledgerId: LedgerId;
-  transactions: Transaction[] = [];
-  accounts = new Map<string, Account>();
+  #transactions: Transaction[] = [];
+  #accounts = new Map<string, Account>();
 
   constructor() {
     super();
@@ -33,13 +35,25 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
       ? this.#fromComplexTransaction(transaction)
       : this.#fromSimpleTransaction(transaction);
 
-    this.transactions.push(trx);
+    this.#transactions.push(trx);
     await this.callHook("transaction:created", trx);
-    return this;
+    return trx;
   }
 
   getBalance(name: string) {
     return this.#getAccount(name).balance;
+  }
+
+  serializeAccounts() {
+    return Array.from(this.#accounts.values());
+  }
+
+  serializeTransactions(): TransactionRow[] {
+    return this.#transactions.map(({ entries, ...t }) => t);
+  }
+
+  serializeEntries() {
+    return this.#transactions.flatMap((trx) => trx.entries);
   }
 
   // ====== Hook handlers ======
@@ -48,7 +62,7 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
     const updatedAccounts = new Set<Account>();
     for (const entry of transaction.entries) {
       const account = this.#getAccountById(entry.accountId);
-      account.balance += entry.value;
+      account.balance += entry.amount;
       updatedAccounts.add(account);
     }
     for (const account of updatedAccounts) {
@@ -58,7 +72,7 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
 
   // ====== Utility functions ======
   #getAccount(name: string, { createIfNotExists } = { createIfNotExists: false }): Account {
-    let account = this.accounts.get(name);
+    let account = this.#accounts.get(name);
 
     if (!account) {
       if (!createIfNotExists) {
@@ -69,16 +83,17 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
         accountId: AccountId(),
         name,
         balance: 0,
+        createdAt: new Date(),
       };
 
-      this.accounts.set(name, account);
+      this.#accounts.set(name, account);
       this.callHook("account:created", account);
     }
 
     return account;
   }
   #getAccountById(accountId: AccountId): Account {
-    for (const account of this.accounts.values()) {
+    for (const account of this.#accounts.values()) {
       if (account.accountId === accountId) {
         return account;
       }
@@ -87,45 +102,41 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
   }
 
   #fromSimpleTransaction(transaction: SimpleTransactionCreatePayload): Transaction {
+    const transactionId = TransactionId();
     return {
       ledgerId: this.ledgerId,
-      transactionId: TransactionId(),
+      transactionId,
       entries: [
-        {
-          value: 0 - transaction.amount,
-          accountId: this.#getAccount(transaction.from, { createIfNotExists: true }).accountId,
-          note: transaction.note ?? "",
-        },
-        {
-          value: transaction.amount,
-          accountId: this.#getAccount(transaction.to, { createIfNotExists: true }).accountId,
-          note: "",
-        },
+        this.#toEntry(transactionId, transaction.from, 0 - transaction.amount, transaction.note ?? ""),
+        this.#toEntry(transactionId, transaction.to, transaction.amount),
       ],
       createdAt: new Date(),
     };
   }
 
   #fromComplexTransaction(transaction: ComplexTransactionCreatePayload): Transaction {
+    const transactionId = TransactionId();
     return {
       ledgerId: this.ledgerId,
-      transactionId: TransactionId(),
+      transactionId,
       entries: transaction.map((entry) => {
         if ("from" in entry) {
-          return {
-            value: 0 - entry.amount,
-            accountId: this.#getAccount(entry.from, { createIfNotExists: true }).accountId,
-            note: entry.note ?? "",
-          };
+          return this.#toEntry(transactionId, entry.from, 0 - entry.amount, entry.note ?? "");
         } else {
-          return {
-            value: entry.amount,
-            accountId: this.#getAccount(entry.to, { createIfNotExists: true }).accountId,
-            note: entry.note ?? "",
-          };
+          return this.#toEntry(transactionId, entry.to, entry.amount, entry.note ?? "");
         }
       }),
       createdAt: new Date(),
+    };
+  }
+
+  #toEntry(transactionId: TransactionId, accountName: string, amount: number, note = ""): Entry {
+    return {
+      entryId: EntryId(),
+      transactionId,
+      amount,
+      accountId: this.#getAccount(accountName, { createIfNotExists: true }).accountId,
+      note,
     };
   }
 }

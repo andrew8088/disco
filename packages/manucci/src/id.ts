@@ -4,7 +4,7 @@ type Brand<P extends string, B> = `${P}${string}` & { __brand: B };
 
 const idCharSet = new Set<string>();
 
-function createId<const P extends string, const N extends string>(prefix: P, _name: N) {
+function createId<const P extends string, const N extends string>(prefix: P, name: N) {
   if (idCharSet.has(prefix)) {
     throw new Error(`Id prefix ${prefix} already exists`);
   }
@@ -16,8 +16,8 @@ function createId<const P extends string, const N extends string>(prefix: P, _na
   }
 
   create.parse = function parse(id: string): Brand<P, N> {
-    if (id.startsWith(prefix)) {
-      throw new Error("Invalid ledger id");
+    if (!id.startsWith(prefix)) {
+      throw new Error(`Invalid ${name}Id: [${id}]`);
     }
     return id as never;
   };
@@ -33,3 +33,6 @@ export type TransactionId = ReturnType<typeof TransactionId>;
 
 export const AccountId = createId("a", "Account");
 export type AccountId = ReturnType<typeof AccountId>;
+
+export const EntryId = createId("e", "Entry");
+export type EntryId = ReturnType<typeof EntryId>;

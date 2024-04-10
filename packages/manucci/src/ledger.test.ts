@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { Ledger, LedgerHooks } from "./ledger";
 import { captureCallbackArgs } from "@disco/test-utils";
+import { AccountId, EntryId, LedgerId, TransactionId } from "./id";
 
 describe("manucci", () => {
   let ledger: Ledger;
@@ -88,10 +89,55 @@ describe("manucci", () => {
     await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
     await ledger.addTransaction({ to: "Alice", from: "Bob", amount: 10 });
 
-    const amounts = (await promise).flatMap((t) => t.entries.map((e) => e.value));
+    const amounts = (await promise).flatMap((t) => t.entries.map((e) => e.amount));
     expect(amounts).toContain(-100);
     expect(amounts).toContain(100);
     expect(amounts).toContain(-10);
     expect(amounts).toContain(10);
+  });
+
+  it("serializes accounts", async () => {
+    await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
+    await ledger.addTransaction({ from: "Alice", to: "Charlie", amount: 50 });
+
+    const accounts = ledger.serializeAccounts();
+    expect(accounts).toMatchObject([
+      { name: "Alice", balance: -150 },
+      { name: "Bob", balance: 100 },
+      { name: "Charlie", balance: 50 },
+    ]);
+  });
+
+  it("serializes transactions", async () => {
+    await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
+    await ledger.addTransaction({ from: "Alice", to: "Charlie", amount: 50 });
+
+    const transactions = ledger.serializeTransactions();
+
+    for (const trx of transactions) {
+      expect(trx.createdAt).toBeInstanceOf(Date);
+      expect(TransactionId.parse(trx.transactionId)).toBe(trx.transactionId);
+      expect(LedgerId.parse(trx.ledgerId)).toBe(trx.ledgerId);
+    }
+  });
+
+  it("serializes entries", async () => {
+    const trx = await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100, note: "for pizza" });
+
+    const accounts = ledger.serializeAccounts();
+    const entries = ledger.serializeEntries();
+
+    const aliceEntry = entries.find((e) => accounts.find((a) => a.accountId === e.accountId)?.name === "Alice");
+    const bobEntry = entries.find((e) => accounts.find((a) => a.accountId === e.accountId)?.name === "Bob");
+
+    for (const entry of entries) {
+      expect(entry.transactionId).toBe(trx.transactionId);
+      expect(EntryId.parse(entry.entryId)).toBe(entry.entryId);
+      expect(AccountId.parse(entry.accountId)).toBe(entry.accountId);
+      expect(TransactionId.parse(entry.transactionId)).toBe(entry.transactionId);
+    }
+
+    expect(aliceEntry).toMatchObject({ amount: -100, note: "for pizza" });
+    expect(bobEntry).toMatchObject({ amount: 100 });
   });
 });

@@ -1,21 +1,30 @@
-import { AccountId, LedgerId } from "./id";
+import { AccountId, EntryId, LedgerId, TransactionId } from "./id";
 
 export type Account = {
   accountId: AccountId;
   name: string;
   balance: number; // cents;
+  createdAt: Date;
 };
 
 export type Transaction = {
   ledgerId: LedgerId;
-  transactionId: `t${string}`;
+  transactionId: TransactionId;
   entries: Entry[];
   createdAt: Date;
 };
 
+export type TransactionRow = {
+  ledgerId: LedgerId;
+  transactionId: TransactionId;
+  createdAt: Date;
+};
+
 export type Entry = {
-  value: number; // cents
-  accountId: Account["accountId"];
+  entryId: EntryId;
+  transactionId: TransactionId;
+  accountId: AccountId;
+  amount: number; // cents
   note: string;
 };
 
