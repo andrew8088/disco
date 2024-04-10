@@ -1,22 +1,12 @@
 import { Hookable } from "hookable";
 import { AccountId, LedgerId, TransactionId } from "./id";
-import { Account, Transaction } from "./manucci";
-
-type SimpleTransaction = {
-  from: string;
-  to: string;
-  amount: number;
-  note?: string;
-};
-
-type ComplexTransaction = (
-  | { from: string; amount: number; note?: string }
-  | {
-      to: string;
-      amount: number;
-      note?: string;
-    }
-)[];
+import {
+  Account,
+  Transaction,
+  TransactionCreatePayload,
+  SimpleTransactionCreatePayload,
+  ComplexTransactionCreatePayload,
+} from "./types";
 
 export type LedgerHooks = {
   "account:created": Account;
@@ -38,7 +28,7 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
     });
   }
 
-  async addTransaction(transaction: SimpleTransaction | ComplexTransaction) {
+  async addTransaction(transaction: TransactionCreatePayload) {
     const trx = Array.isArray(transaction)
       ? this.#fromComplexTransaction(transaction)
       : this.#fromSimpleTransaction(transaction);
@@ -96,7 +86,7 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
     throw new Error(`Account not found for ID: ${accountId}`);
   }
 
-  #fromSimpleTransaction(transaction: SimpleTransaction): Transaction {
+  #fromSimpleTransaction(transaction: SimpleTransactionCreatePayload): Transaction {
     return {
       ledgerId: this.ledgerId,
       transactionId: TransactionId(),
@@ -116,7 +106,7 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
     };
   }
 
-  #fromComplexTransaction(transaction: ComplexTransaction): Transaction {
+  #fromComplexTransaction(transaction: ComplexTransactionCreatePayload): Transaction {
     return {
       ledgerId: this.ledgerId,
       transactionId: TransactionId(),
