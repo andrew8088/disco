@@ -1,22 +1,29 @@
 import { Hookable } from "hookable";
 import { AccountId, LedgerId, TransactionId } from "./id";
-import { Transaction } from "./manucci";
+import { Account, Transaction } from "./manucci";
 
 type SimpleTransaction = {
   from: string;
   to: string;
   amount: number;
+  note?: string;
 };
 
 type ComplexTransaction = (
-  | { from: string; amount: number }
+  | { from: string; amount: number; note?: string }
   | {
       to: string;
       amount: number;
+      note?: string;
     }
 )[];
 
-export class Ledger extends Hookable {
+type LedgerHooks = {
+  "account:created": (account: Account) => void;
+  "transaction:created": (transaction: Transaction) => void;
+};
+
+export class Ledger extends Hookable<LedgerHooks> {
   ledgerId: LedgerId;
   transactions: Transaction[] = [];
   accounts = new Map<string, AccountId>();
@@ -24,58 +31,18 @@ export class Ledger extends Hookable {
   constructor() {
     super();
     this.ledgerId = LedgerId();
+
+    this.hook("transaction:created", (transaction) => {
+      this.transactions.push(transaction);
+    });
   }
 
-  addTransaction(transaction: SimpleTransaction | ComplexTransaction) {
-    if (Array.isArray(transaction)) {
-      const entries = transaction.map((entry) => {
-        if ("from" in entry) {
-          return {
-            value: 0 - entry.amount,
-            accountId: this.#getAccountId(entry.from),
-            note: "",
-          };
-        } else {
-          return {
-            value: entry.amount,
-            accountId: this.#getAccountId(entry.to),
-            note: "",
-          };
-        }
-      });
+  async addTransaction(transaction: SimpleTransaction | ComplexTransaction) {
+    const trx = Array.isArray(transaction)
+      ? this.#fromComplexTransaction(transaction)
+      : this.#fromSimpleTransaction(transaction);
 
-      const trx = {
-        ledgerId: this.ledgerId,
-        transactionId: TransactionId(),
-        entries,
-        createdAt: new Date(),
-      };
-
-      this.callHook("transaction:create", trx);
-      this.transactions.push(trx);
-    } else {
-      const entry1 = {
-        value: 0 - transaction.amount,
-        accountId: this.#getAccountId(transaction.from),
-        note: "",
-      };
-
-      const entry2 = {
-        value: transaction.amount,
-        accountId: this.#getAccountId(transaction.to),
-        note: "",
-      };
-
-      const trx = {
-        ledgerId: this.ledgerId,
-        transactionId: TransactionId(),
-        entries: [entry1, entry2],
-        createdAt: new Date(),
-      };
-
-      this.callHook("transaction:create", trx);
-      this.transactions.push(trx);
-    }
+    await this.callHook("transaction:created", trx);
     return this;
   }
 
@@ -103,11 +70,54 @@ export class Ledger extends Hookable {
     const accountId = AccountId();
     this.accounts.set(name, accountId);
 
-    this.callHook("account:create", {
+    this.callHook("account:created", {
       accountId,
       name,
     });
 
     return accountId;
+  }
+
+  #fromSimpleTransaction(transaction: SimpleTransaction): Transaction {
+    return {
+      ledgerId: this.ledgerId,
+      transactionId: TransactionId(),
+      entries: [
+        {
+          value: 0 - transaction.amount,
+          accountId: this.#getAccountId(transaction.from),
+          note: transaction.note ?? "",
+        },
+        {
+          value: transaction.amount,
+          accountId: this.#getAccountId(transaction.to),
+          note: "",
+        },
+      ],
+      createdAt: new Date(),
+    };
+  }
+
+  #fromComplexTransaction(transaction: ComplexTransaction): Transaction {
+    return {
+      ledgerId: this.ledgerId,
+      transactionId: TransactionId(),
+      entries: transaction.map((entry) => {
+        if ("from" in entry) {
+          return {
+            value: 0 - entry.amount,
+            accountId: this.#getAccountId(entry.from),
+            note: entry.note ?? "",
+          };
+        } else {
+          return {
+            value: entry.amount,
+            accountId: this.#getAccountId(entry.to),
+            note: entry.note ?? "",
+          };
+        }
+      }),
+      createdAt: new Date(),
+    };
   }
 }

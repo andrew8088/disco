@@ -4,29 +4,29 @@ import { Account, Transaction } from "./manucci";
 import { captureCallbackArgs } from "@disco/test-utils";
 
 describe("manucci", () => {
-  it("works for simple transactions", () => {
+  it("works for simple transactions", async () => {
     const ledger = new Ledger();
-    ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
+    await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
     expect(ledger.getBalance("Alice")).toBe(-100);
     expect(ledger.getBalance("Bob")).toBe(100);
   });
 
-  it("balances across multiple transactions", () => {
+  it("balances across multiple transactions", async () => {
     const ledger = new Ledger();
-    ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
-    ledger.addTransaction({ from: "Alice", to: "Charlie", amount: 50 });
+    await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
+    await ledger.addTransaction({ from: "Alice", to: "Charlie", amount: 50 });
     expect(ledger.getBalance("Alice")).toBe(-150);
     expect(ledger.getBalance("Bob")).toBe(100);
     expect(ledger.getBalance("Charlie")).toBe(50);
 
-    ledger.addTransaction({ from: "Bob", to: "Charlie", amount: 25 });
+    await ledger.addTransaction({ from: "Bob", to: "Charlie", amount: 25 });
     expect(ledger.getBalance("Bob")).toBe(75);
     expect(ledger.getBalance("Charlie")).toBe(75);
   });
 
-  it("handles complex transactions", () => {
+  it("handles complex transactions", async () => {
     const ledger = new Ledger();
-    ledger.addTransaction([
+    await ledger.addTransaction([
       { from: "Alice", amount: 100 },
       { to: "Bob", amount: 50 },
       { to: "Charlie", amount: 50 },
@@ -42,8 +42,8 @@ describe("manucci", () => {
 
     const { callback, promise } = captureCallbackArgs<Account>((_, arr) => arr.length === 2);
 
-    ledger.hook("account:create", callback);
-    ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
+    ledger.hook("account:created", callback);
+    await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
 
     const accountNames = (await promise).map((a) => a.name);
     expect(accountNames).toContain("Alice");
@@ -55,9 +55,9 @@ describe("manucci", () => {
 
     const { callback, promise } = captureCallbackArgs<Transaction>((_, arr) => arr.length === 2);
 
-    ledger.hook("transaction:create", callback);
-    ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
-    ledger.addTransaction({ to: "Alice", from: "Bob", amount: 10 });
+    ledger.hook("transaction:created", callback);
+    await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
+    await ledger.addTransaction({ to: "Alice", from: "Bob", amount: 10 });
 
     const amounts = (await promise).flatMap((t) => t.entries.map((e) => e.value));
     expect(amounts).toContain(-100);
