@@ -1,18 +1,27 @@
-import { describe, expect, it } from "vitest";
-import { Ledger } from "./ledger";
-import { Account, Transaction } from "./manucci";
+import { describe, expect, it, beforeEach } from "vitest";
+import { Ledger, LedgerHooks } from "./ledger";
 import { captureCallbackArgs } from "@disco/test-utils";
 
 describe("manucci", () => {
+  let ledger: Ledger;
+
+  function eventPromise<E extends keyof LedgerHooks>(event: E, count = 2) {
+    const e = captureCallbackArgs<LedgerHooks[E]>(count);
+    ledger.hook(event, e.callback as never);
+    return e.promise;
+  }
+
+  beforeEach(() => {
+    ledger = new Ledger();
+  });
+
   it("works for simple transactions", async () => {
-    const ledger = new Ledger();
     await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
     expect(ledger.getBalance("Alice")).toBe(-100);
     expect(ledger.getBalance("Bob")).toBe(100);
   });
 
   it("balances across multiple transactions", async () => {
-    const ledger = new Ledger();
     await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
     await ledger.addTransaction({ from: "Alice", to: "Charlie", amount: 50 });
     expect(ledger.getBalance("Alice")).toBe(-150);
@@ -25,11 +34,7 @@ describe("manucci", () => {
   });
 
   it("handles complex transactions", async () => {
-    const ledger = new Ledger();
-
-    const { callback, promise } = captureCallbackArgs<Account>(3);
-
-    ledger.hook("account:updated", callback);
+    const promise = eventPromise("account:updated", 3);
 
     await ledger.addTransaction([
       { from: "Alice", amount: 100 },
@@ -50,12 +55,26 @@ describe("manucci", () => {
     });
   });
 
+  it("omits one account update event for a tranaction with multiple entries from one account", async () => {
+    const promise = eventPromise("account:updated");
+
+    await ledger.addTransaction([
+      { from: "Alice", amount: 100 },
+      { from: "Alice", amount: 50 },
+      { to: "Bob", amount: 150 },
+    ]);
+
+    const updatedAccounts = Object.fromEntries((await promise).map((a) => [a.name, a.balance]));
+
+    expect(updatedAccounts).toMatchObject({
+      Alice: -150,
+      Bob: 150,
+    });
+  });
+
   it("emits new account events", async () => {
-    const ledger = new Ledger();
+    const promise = eventPromise("account:created");
 
-    const { callback, promise } = captureCallbackArgs<Account>(2);
-
-    ledger.hook("account:created", callback);
     await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
 
     const accountNames = (await promise).map((a) => a.name);
@@ -64,11 +83,8 @@ describe("manucci", () => {
   });
 
   it("emits new transaction events", async () => {
-    const ledger = new Ledger();
+    const promise = eventPromise("transaction:created");
 
-    const { callback, promise } = captureCallbackArgs<Transaction>(2);
-
-    ledger.hook("transaction:created", callback);
     await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
     await ledger.addTransaction({ to: "Alice", from: "Bob", amount: 10 });
 

@@ -18,13 +18,13 @@ type ComplexTransaction = (
     }
 )[];
 
-type LedgerHooks = {
-  "account:created": (account: Account) => void;
-  "account:updated": (account: Account) => void;
-  "transaction:created": (transaction: Transaction) => void;
+export type LedgerHooks = {
+  "account:created": Account;
+  "account:updated": Account;
+  "transaction:created": Transaction;
 };
 
-export class Ledger extends Hookable<LedgerHooks> {
+export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHooks[K]) => void }> {
   ledgerId: LedgerId;
   transactions: Transaction[] = [];
   accounts = new Map<string, Account>();
@@ -55,14 +55,11 @@ export class Ledger extends Hookable<LedgerHooks> {
   // ====== Hook handlers ======
   async #onTransactionCreated(transaction: Transaction) {
     // 1. update the account balances
-    const updatedAccounts = [];
+    const updatedAccounts = new Set<Account>();
     for (const entry of transaction.entries) {
       const account = this.#getAccountById(entry.accountId);
-      if (!account) {
-        throw new Error("Account not found for existing transaction");
-      }
       account.balance += entry.value;
-      updatedAccounts.push(account);
+      updatedAccounts.add(account);
     }
     for (const account of updatedAccounts) {
       await this.callHook("account:updated", account);
@@ -96,7 +93,7 @@ export class Ledger extends Hookable<LedgerHooks> {
         return account;
       }
     }
-    throw new Error("Account not found");
+    throw new Error(`Account not found for ID: ${accountId}`);
   }
 
   #fromSimpleTransaction(transaction: SimpleTransaction): Transaction {
