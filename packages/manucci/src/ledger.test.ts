@@ -26,21 +26,34 @@ describe("manucci", () => {
 
   it("handles complex transactions", async () => {
     const ledger = new Ledger();
+
+    const { callback, promise } = captureCallbackArgs<Account>(3);
+
+    ledger.hook("account:updated", callback);
+
     await ledger.addTransaction([
       { from: "Alice", amount: 100 },
       { to: "Bob", amount: 50 },
       { to: "Charlie", amount: 50 },
     ]);
 
+    const updatedAccounts = Object.fromEntries((await promise).map((a) => [a.name, a.balance]));
+
     expect(ledger.getBalance("Alice")).toBe(-100);
     expect(ledger.getBalance("Bob")).toBe(50);
     expect(ledger.getBalance("Charlie")).toBe(50);
+
+    expect(updatedAccounts).toMatchObject({
+      Alice: -100,
+      Bob: 50,
+      Charlie: 50,
+    });
   });
 
   it("emits new account events", async () => {
     const ledger = new Ledger();
 
-    const { callback, promise } = captureCallbackArgs<Account>((_, arr) => arr.length === 2);
+    const { callback, promise } = captureCallbackArgs<Account>(2);
 
     ledger.hook("account:created", callback);
     await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });
@@ -53,7 +66,7 @@ describe("manucci", () => {
   it("emits new transaction events", async () => {
     const ledger = new Ledger();
 
-    const { callback, promise } = captureCallbackArgs<Transaction>((_, arr) => arr.length === 2);
+    const { callback, promise } = captureCallbackArgs<Transaction>(2);
 
     ledger.hook("transaction:created", callback);
     await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100 });

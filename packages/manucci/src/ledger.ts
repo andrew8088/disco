@@ -34,22 +34,7 @@ export class Ledger extends Hookable<LedgerHooks> {
     this.ledgerId = LedgerId();
 
     this.hook("transaction:created", async (transaction) => {
-      // 1. store the transaction
-      this.transactions.push(transaction);
-
-      // 2. update the account balances
-      const updatedAccounts = [];
-      for (const entry of transaction.entries) {
-        const account = this.#getAccountById(entry.accountId);
-        if (!account) {
-          throw new Error("Account not found for existing transaction");
-        }
-        account.balance += entry.value;
-        updatedAccounts.push(account);
-      }
-      for (const account of updatedAccounts) {
-        await this.callHook("account:updated", account);
-      }
+      this.#onTransactionCreated(transaction);
     });
   }
 
@@ -58,6 +43,7 @@ export class Ledger extends Hookable<LedgerHooks> {
       ? this.#fromComplexTransaction(transaction)
       : this.#fromSimpleTransaction(transaction);
 
+    this.transactions.push(trx);
     await this.callHook("transaction:created", trx);
     return this;
   }
@@ -67,6 +53,21 @@ export class Ledger extends Hookable<LedgerHooks> {
   }
 
   // ====== Hook handlers ======
+  async #onTransactionCreated(transaction: Transaction) {
+    // 1. update the account balances
+    const updatedAccounts = [];
+    for (const entry of transaction.entries) {
+      const account = this.#getAccountById(entry.accountId);
+      if (!account) {
+        throw new Error("Account not found for existing transaction");
+      }
+      account.balance += entry.value;
+      updatedAccounts.push(account);
+    }
+    for (const account of updatedAccounts) {
+      await this.callHook("account:updated", account);
+    }
+  }
 
   // ====== Utility functions ======
   #getAccount(name: string, { createIfNotExists } = { createIfNotExists: false }): Account {

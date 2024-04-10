@@ -51,15 +51,17 @@ export async function getException(fn: (...args: never[]) => unknown) {
   }
 }
 
-export function captureCallbackArgs<T>(until: (t: T, ts: T[]) => boolean) {
+export function captureCallbackArgs<T>(until: number | ((t: T, ts: T[]) => boolean)) {
   const { promise, resolve } = deferred<T[]>();
   const values: T[] = [];
+
+  const fn = typeof until === "number" ? (_t: T, ts: T[]) => ts.length === until : until;
 
   return {
     callback(t: T) {
       values.push(t);
 
-      if (until(t, values)) {
+      if (fn(t, values)) {
         resolve(values);
       }
     },
