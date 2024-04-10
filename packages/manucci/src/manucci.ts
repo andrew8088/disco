@@ -3,6 +3,7 @@ import { AccountId, LedgerId } from "./id";
 export type Account = {
   accountId: AccountId;
   name: string;
+  balance: number; // cents;
 };
 
 export type Transaction = {

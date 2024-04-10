@@ -20,20 +20,36 @@ type ComplexTransaction = (
 
 type LedgerHooks = {
   "account:created": (account: Account) => void;
+  "account:updated": (account: Account) => void;
   "transaction:created": (transaction: Transaction) => void;
 };
 
 export class Ledger extends Hookable<LedgerHooks> {
   ledgerId: LedgerId;
   transactions: Transaction[] = [];
-  accounts = new Map<string, AccountId>();
+  accounts = new Map<string, Account>();
 
   constructor() {
     super();
     this.ledgerId = LedgerId();
 
-    this.hook("transaction:created", (transaction) => {
+    this.hook("transaction:created", async (transaction) => {
+      // 1. store the transaction
       this.transactions.push(transaction);
+
+      // 2. update the account balances
+      const updatedAccounts = [];
+      for (const entry of transaction.entries) {
+        const account = this.#getAccountById(entry.accountId);
+        if (!account) {
+          throw new Error("Account not found for existing transaction");
+        }
+        account.balance += entry.value;
+        updatedAccounts.push(account);
+      }
+      for (const account of updatedAccounts) {
+        await this.callHook("account:updated", account);
+      }
     });
   }
 
@@ -47,35 +63,39 @@ export class Ledger extends Hookable<LedgerHooks> {
   }
 
   getBalance(name: string) {
-    let bal = 0;
-
-    for (const transaction of this.transactions) {
-      for (const entry of transaction.entries) {
-        if (entry.accountId === this.#getAccountId(name)) {
-          bal += entry.value;
-        }
-      }
-    }
-
-    return bal;
+    return this.#getAccount(name).balance;
   }
 
-  #getAccountId(name: string) {
-    const id = this.accounts.get(name);
+  // ====== Hook handlers ======
 
-    if (id) {
-      return id;
+  // ====== Utility functions ======
+  #getAccount(name: string, { createIfNotExists } = { createIfNotExists: false }): Account {
+    let account = this.accounts.get(name);
+
+    if (!account) {
+      if (!createIfNotExists) {
+        throw new Error(`Account not found: ${name}`);
+      }
+
+      account = {
+        accountId: AccountId(),
+        name,
+        balance: 0,
+      };
+
+      this.accounts.set(name, account);
+      this.callHook("account:created", account);
     }
 
-    const accountId = AccountId();
-    this.accounts.set(name, accountId);
-
-    this.callHook("account:created", {
-      accountId,
-      name,
-    });
-
-    return accountId;
+    return account;
+  }
+  #getAccountById(accountId: AccountId): Account {
+    for (const account of this.accounts.values()) {
+      if (account.accountId === accountId) {
+        return account;
+      }
+    }
+    throw new Error("Account not found");
   }
 
   #fromSimpleTransaction(transaction: SimpleTransaction): Transaction {
@@ -85,12 +105,12 @@ export class Ledger extends Hookable<LedgerHooks> {
       entries: [
         {
           value: 0 - transaction.amount,
-          accountId: this.#getAccountId(transaction.from),
+          accountId: this.#getAccount(transaction.from, { createIfNotExists: true }).accountId,
           note: transaction.note ?? "",
         },
         {
           value: transaction.amount,
-          accountId: this.#getAccountId(transaction.to),
+          accountId: this.#getAccount(transaction.to, { createIfNotExists: true }).accountId,
           note: "",
         },
       ],
@@ -106,13 +126,13 @@ export class Ledger extends Hookable<LedgerHooks> {
         if ("from" in entry) {
           return {
             value: 0 - entry.amount,
-            accountId: this.#getAccountId(entry.from),
+            accountId: this.#getAccount(entry.from, { createIfNotExists: true }).accountId,
             note: entry.note ?? "",
           };
         } else {
           return {
             value: entry.amount,
-            accountId: this.#getAccountId(entry.to),
+            accountId: this.#getAccount(entry.to, { createIfNotExists: true }).accountId,
             note: entry.note ?? "",
           };
         }
