@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
     "@types/uuid": "^9.0.8",
     "typescript": "^5.2.2",
     "vite": "^5.1.4",
@@ -19,7 +20,9 @@
   },
   "dependencies": {
     "@disco/common": "workspace:^",
+    "@disco/parz": "workspace:^",
     "@disco/test-utils": "workspace:^",
+    "better-sqlite3": "^9.5.0",
     "hookable": "^5.5.3",
     "uuid": "^9.0.1"
   }

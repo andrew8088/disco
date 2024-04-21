@@ -4,7 +4,7 @@ type Brand<P extends string, B> = `${P}${string}` & { __brand: B };
 
 const idCharSet = new Set<string>();
 
-function createId<const P extends string, const N extends string>(prefix: P, name: N) {
+export function createId<const P extends string, const N extends string>(prefix: P, name: N) {
   if (idCharSet.has(prefix)) {
     throw new Error(`Id prefix ${prefix} already exists`);
   }
@@ -22,6 +22,10 @@ function createId<const P extends string, const N extends string>(prefix: P, nam
     return id as never;
   };
 
+  create.mock = function mock(): Brand<P, N> {
+    return create();
+  };
+
   return create;
 }
 
@@ -30,9 +34,6 @@ export type LedgerId = ReturnType<typeof LedgerId>;
 
 export const TransactionId = createId("t", "Transaction");
 export type TransactionId = ReturnType<typeof TransactionId>;
-
-export const AccountId = createId("a", "Account");
-export type AccountId = ReturnType<typeof AccountId>;
 
 export const EntryId = createId("e", "Entry");
 export type EntryId = ReturnType<typeof EntryId>;

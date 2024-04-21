@@ -1,12 +1,5 @@
 import { AccountId, EntryId, LedgerId, TransactionId } from "./id";
 
-export type Account = {
-  accountId: AccountId;
-  name: string;
-  balance: number; // cents;
-  createdAt: Date;
-};
-
 export type Transaction = {
   ledgerId: LedgerId;
   transactionId: TransactionId;

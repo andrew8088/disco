@@ -1,7 +1,8 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { Ledger, LedgerHooks } from "./ledger";
 import { captureCallbackArgs } from "@disco/test-utils";
-import { AccountId, EntryId, LedgerId, TransactionId } from "./id";
+import { EntryId, LedgerId, TransactionId } from "./id";
+import { AccountId } from "./account";
 
 describe("manucci", () => {
   let ledger: Ledger;
