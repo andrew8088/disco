@@ -3,12 +3,13 @@ import { createErrorClass } from "@disco/common";
 
 const [SqliteReaderError] = createErrorClass<{ query: string }>("SqliteReaderError");
 const [NotFoundError] = createErrorClass("NotFoundError", SqliteReaderError);
+const [TooManyFoundError] = createErrorClass("TooManyFoundError", SqliteReaderError);
 
-export abstract class SqliteReader<To> {
+export abstract class SqliteReader<From, To> {
   db: Sqlite.Database;
 
-  #whereClauses: string[] = [];
-  #whereValues: unknown[] = [];
+  #whereClauses: Array<keyof From> = [];
+  #whereValues: Array<unknown> = [];
 
   abstract tableName: string;
   abstract selectFields: string[];
@@ -17,13 +18,12 @@ export abstract class SqliteReader<To> {
     this.db = db;
   }
 
-  abstract transform(rows: unknown[]): Promise<To[]>;
+  abstract transform(rows: From[]): Promise<To[]>;
 
-  async #select(): Promise<unknown[]> {
+  async #select(): Promise<From[]> {
     const [, whereValues] = this.#getWhere();
-    console.log(this.#getQuery());
     const stmt = this.db.prepare(this.#getQuery());
-    return stmt.all(whereValues);
+    return stmt.all(whereValues) as From[];
   }
 
   #getQuery(): string {
@@ -36,7 +36,7 @@ export abstract class SqliteReader<To> {
       return ["", []];
     }
 
-    return ["WHERE " + this.#whereClauses.join(" AND "), this.#whereValues];
+    return ["WHERE " + this.#whereClauses.map((f) => `${String(f)} = ?`).join(" AND "), this.#whereValues];
   }
 
   async findOne(): Promise<To> {
@@ -47,7 +47,7 @@ export abstract class SqliteReader<To> {
     }
 
     if (rows.length > 1) {
-      throw new NotFoundError(`Too many rows found: ${rows.length} instead of 1`, { query: this.#getQuery() });
+      throw new TooManyFoundError(`Too many rows found: ${rows.length} instead of 1`, { query: this.#getQuery() });
     }
 
     return (await this.transform([rows[0]]))[0];
@@ -58,8 +58,8 @@ export abstract class SqliteReader<To> {
     return this.transform(rows);
   }
 
-  where(field: string, value: unknown): this {
-    this.#whereClauses.push(`${field} = ?`);
+  where(field: keyof From, value: unknown): this {
+    this.#whereClauses.push(field);
     this.#whereValues.push(value);
     return this;
   }

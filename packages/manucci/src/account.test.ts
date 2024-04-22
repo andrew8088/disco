@@ -4,6 +4,7 @@ import { join } from "path";
 import { describe, expect, it, beforeEach } from "vitest";
 import * as Account from "./account";
 import Database, * as Sqlite from "better-sqlite3";
+import { getException } from "@disco/test-utils";
 
 describe("account", () => {
   let db: Sqlite.Database;
@@ -34,7 +35,18 @@ describe("account", () => {
   });
   it("reads one account", async () => {
     const reader = new Account.Reader(db);
-    const account = await reader.where("accountId", ids[0]).findOne();
+    const account = await reader.hasId(ids[0]).findOne();
     expect(account.accountId).toEqual(ids[0]);
+  });
+
+  it("throws NotFoundError when no rows found", async () => {
+    const reader = new Account.Reader(db);
+    const err = await getException(() => reader.hasId(Account.AccountId()).findOne());
+    expect(err.type).toEqual("NotFoundError");
+  });
+  it("throws NotFoundError when too many rows found", async () => {
+    const reader = new Account.Reader(db);
+    const err = await getException(() => reader.findOne());
+    expect(err.type).toEqual("TooManyFoundError");
   });
 });

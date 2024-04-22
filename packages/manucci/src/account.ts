@@ -6,6 +6,13 @@ import { coerseStringToDateParser } from "./util";
 export const AccountId = createId("a", "Account");
 export type AccountId = ReturnType<typeof AccountId>;
 
+export type RawAccount = {
+  accountId: string;
+  name: string;
+  balance: number; // cents;
+  createdAt: string;
+};
+
 export type Account = {
   accountId: AccountId;
   name: string;
@@ -29,11 +36,15 @@ export const tableDefinition = `
   );
 `;
 
-export class Reader extends SqliteReader<Account> {
+export class Reader extends SqliteReader<RawAccount, Account> {
   tableName = "account";
   selectFields = ["accountId", "name", "balance", "createdAt"];
 
   async transform(rows: unknown[]): Promise<Account[]> {
     return rows.map((r) => schema.parse(r));
+  }
+
+  hasId(accountId: AccountId): this {
+    return this.where("accountId", accountId);
   }
 }
