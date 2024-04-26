@@ -5,6 +5,7 @@ import string from "./string";
 import number from "./number";
 import boolean from "./boolean";
 import literal from "./literal";
+import { Parz } from ".";
 
 const schema = object({
   age: number(),
@@ -69,4 +70,8 @@ it("mock strongly", () => {
       };
     };
   }>();
+});
+
+it("parses fields", () => {
+  expectTypeOf(schema.field("name")).toEqualTypeOf<Parz<string>>();
 });

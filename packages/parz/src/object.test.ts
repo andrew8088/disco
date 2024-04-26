@@ -159,4 +159,8 @@ describe("object", () => {
       },
     });
   });
+
+  it("parses individual fields", () => {
+    expect(schema.field("name").parse("42")).toEqual("42");
+  });
 });

@@ -5,7 +5,9 @@ export default function object<Def extends Record<string, Parz<T>>, T>(
   definition: Def,
 ): Parz<{
   [K in keyof Def]: ReturnType<Def[K]["parse"]>;
-}> {
+}> & {
+  field<K extends keyof Def>(name: K): Def[K];
+} {
   return {
     parse(value: unknown): {
       [K in keyof Def]: ReturnType<Def[K]["parse"]>;
@@ -40,6 +42,9 @@ export default function object<Def extends Record<string, Parz<T>>, T>(
         ret[k] = definition[k].mock();
       }
       return ret as never;
+    },
+    field<K extends keyof Def>(name: K) {
+      return definition[name];
     },
   };
 }
