@@ -63,6 +63,9 @@ importers:
 
   packages/common:
     devDependencies:
+      '@disco/test-utils':
+        specifier: workspace:^
+        version: link:../test-utils
       typescript:
         specifier: ^5.4.2
         version: 5.4.2
