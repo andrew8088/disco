@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
+    "typescript": "^5.4.5",
     "unimport": "^3.7.1",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3",
