@@ -1,3 +1,4 @@
 node_modules
 packages/*/dist
+packages/*/scratch
 packages/*/tsconfig.tsbuildinfo
