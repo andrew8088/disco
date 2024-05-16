@@ -3,15 +3,25 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "test": "vitest --typecheck",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "unbuild"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
+    "unbuild": "^2.0.0",
     "unimport": "^3.7.1",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3",
