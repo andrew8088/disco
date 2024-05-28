@@ -18,21 +18,21 @@ const widget = z.object({
 
 describe("Selector", () => {
   it("creates a parser for the selected fields", () => {
-    const query = new Selector({ user, widget }).select("user.id as userId").select("widget.id as widgetId").value();
+    const [parser] = new Selector({ user, widget }).select("user.id as userId").select("widget.id as widgetId").value();
 
-    const val = query.parse({});
+    const val = parser.parse({});
 
     expectTypeOf(val).toEqualTypeOf<{ userId: number; widgetId: string }>();
   });
 
   it("can add tables", () => {
-    const query = new Selector({ user })
+    const [parser] = new Selector({ user })
       .select("user.id as userId")
       .table("widget", widget)
       .select("widget.id as widgetId")
       .value();
 
-    const val = query.parse({});
+    const val = parser.parse({});
 
     expectTypeOf(val).toEqualTypeOf<{ userId: number; widgetId: string }>();
   });

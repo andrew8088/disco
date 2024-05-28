@@ -18,10 +18,12 @@ export default class Selector<
 > {
   #tables: Tables;
   #outShape?: OutShape;
+  #selections: string[];
 
-  constructor(tables: Tables, outShape?: OutShape) {
+  constructor(tables: Tables, outShape?: OutShape, selections: string[] = []) {
     this.#tables = tables;
     this.#outShape = outShape;
+    this.#selections = selections;
   }
 
   table<T, N extends string, S extends z.ParzObject<Record<string, z.Parz<T>>>>(name: N, shape: S) {
@@ -30,13 +32,13 @@ export default class Selector<
       [name]: shape,
     } as never;
 
-    return new Selector(newTables, this.#outShape);
+    return new Selector(newTables, this.#outShape, this.#selections);
   }
 
   field<K extends keyof Tables, F extends ParzKeys<Tables[K]>, T extends string>(table: K, field: F, rename: T) {
     const parser = this.#tables[table].field(field);
     const partial: OutShape & { [X in T]: ParzValues<Tables[K], F> } = { ...this.#outShape, [rename]: parser } as never;
-    return new Selector(this.#tables, partial);
+    return new Selector(this.#tables, partial, this.#selections);
   }
 
   select<K extends keyof Tables, F extends ParzKeys<Tables[K]>, T extends string>(arg: Selectable<K, F, T>) {
@@ -44,12 +46,12 @@ export default class Selector<
 
     const parser = this.#tables[table].field(field);
     const partial: OutShape & { [X in T]: ParzValues<Tables[K], F> } = { ...this.#outShape, [rename]: parser } as never;
-    return new Selector(this.#tables, partial);
+    return new Selector(this.#tables, partial, [...this.#selections, arg]);
   }
 
   value() {
     if (!this.#outShape) throw "boom";
-    return z.object(this.#outShape);
+    return [z.object(this.#outShape), this.#toSqlQuery()] as const;
   }
 
   #parseParts<K extends keyof Tables, F extends ParzKeys<Tables[K]>, T extends string>(
@@ -63,5 +65,9 @@ export default class Selector<
       const [table, col] = val.split(".");
       return [table, col, col] as never;
     }
+  }
+
+  #toSqlQuery() {
+    return `SELECT ${this.#selections.join(", ")} FROM ${Object.keys(this.#tables).join(", ")}`;
   }
 }
