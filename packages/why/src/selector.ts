@@ -12,7 +12,10 @@ type Selectable<
   C extends string,
 > = `${Extract<A, string>}.${B} as ${C}`;
 
-export class Selector<Tables extends { [tableName: string]: z.ParzObject<Record<string, z.Parz<unknown>>> }, OutShape> {
+export default class Selector<
+  Tables extends { [tableName: string]: z.ParzObject<Record<string, z.Parz<unknown>>> },
+  OutShape,
+> {
   #tables: Tables;
   #outShape?: OutShape;
 
