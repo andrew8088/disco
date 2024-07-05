@@ -1,4 +1,3 @@
-import { deferred } from "@disco/common";
 import http from "http";
 
 export async function getClientAndServer() {
@@ -22,7 +21,7 @@ export async function getClientAndServer() {
 export type TestHTTPClient = Awaited<ReturnType<typeof getClientAndServer>>[0];
 
 function getPort(server: http.Server) {
-  const { promise, resolve, reject } = deferred<number>();
+  const { promise, resolve, reject } = Promise.withResolvers<number>();
 
   server.on("listening", () => {
     const addr = server.address();
@@ -52,7 +51,7 @@ export async function getException(fn: (...args: never[]) => unknown) {
 }
 
 export function captureCallbackArgs<T>(until: number | ((t: T, ts: T[]) => boolean)) {
-  const { promise, resolve } = deferred<T[]>();
+  const { promise, resolve } = Promise.withResolvers<T[]>();
   const values: T[] = [];
 
   const fn = typeof until === "number" ? (_t: T, ts: T[]) => ts.length === until : until;
