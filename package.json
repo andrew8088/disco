@@ -18,9 +18,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "engines": {
-    "node": ">=21.6.2"
-  },
   "type": "module",
   "devDependencies": {
     "@commitlint/cli": "^19.0.3",
