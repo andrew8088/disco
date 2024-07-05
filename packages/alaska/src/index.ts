@@ -6,7 +6,7 @@ type StateConfig<TData, TStateKey extends string> = {
       on?: {
         [eventName: string]: {
           to?: NoInfer<TStateKey>;
-          do?: (data: NoInfer<TData>, payload: never) => void;
+          do?: (data: NoInfer<TData>) => void;
         };
       };
     };
@@ -16,7 +16,7 @@ type StateConfig<TData, TStateKey extends string> = {
 type StateMachine<TData> = {
   data: TData;
   state: string;
-  send: (eventName: string, payload: never) => void;
+  send: (eventName: string) => void;
 };
 
 export function createMachine<TData, TStateKey extends string>(
@@ -32,14 +32,14 @@ export function createMachine<TData, TStateKey extends string>(
     get state() {
       return currentState;
     },
-    send(eventName: string, payload: never) {
+    send(eventName: string) {
       const currentStateConfig = stateConfig.states[currentState];
 
       if (currentStateConfig.on?.[eventName]) {
         const eventConfig = currentStateConfig.on[eventName];
 
         if (eventConfig.do) {
-          eventConfig.do(stateConfig.data, payload);
+          eventConfig.do(stateConfig.data);
         }
         if (eventConfig.to) {
           currentState = eventConfig.to;

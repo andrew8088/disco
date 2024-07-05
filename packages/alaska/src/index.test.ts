@@ -15,8 +15,8 @@ describe("createMachine", () => {
         running: {
           on: {
             increment: {
-              do: (data, payload: number) => {
-                data.count += payload;
+              do: (data) => {
+                data.count += 1;
               },
             },
           },
@@ -25,15 +25,13 @@ describe("createMachine", () => {
     });
 
     expect(machine.state).toBe("idle");
-    console.log("count", machine.data.count);
-    machine.send("increment", 1 as never);
-    console.log("count", machine.data.count);
-    machine.send("start", 1 as never);
+    machine.send("increment");
+    expect(machine.data.count).toBe(0);
+    machine.send("start");
     expect(machine.state).toBe("running");
-    machine.send("increment", 1 as never);
-    console.log("count", machine.data.count);
-    machine.send("increment", 11 as never);
-    console.log("count", machine.data.count);
-    expect(machine.data.count).toBe(12);
+    machine.send("increment");
+    expect(machine.data.count).toBe(1);
+    machine.send("increment");
+    expect(machine.data.count).toBe(2);
   });
 });
