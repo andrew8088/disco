@@ -67,3 +67,9 @@ export function nameFn<T extends (...args: never[]) => unknown>(name: string | u
 function defineName<T>(t: T, value: string) {
   Object.defineProperty(t, "name", { value });
 }
+
+export async function forAwait<T>(iter: AsyncIterable<T>, fn: (t: T) => unknown | Promise<unknown>) {
+  for await (const t of iter) {
+    await fn(t);
+  }
+}

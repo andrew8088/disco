@@ -1,6 +1,6 @@
 import { setTimeout } from "node:timers/promises";
 import { it, expect, describe } from "vitest";
-import { createErrorClass, deferred, pipe, pipeAsync } from "./index";
+import { createErrorClass, deferred, pipe, pipeAsync, forAwait } from "./index";
 
 describe("deferred", () => {
   it("resolves the promise", () => {
@@ -76,5 +76,31 @@ describe("createErrorClass", () => {
       // console.log(err);
       //expect(err.stack).toContain("FooError");
     }
+  });
+});
+
+describe("forAwait", () => {
+  it("works", async () => {
+    const range: AsyncIterable<number> = {
+      [Symbol.asyncIterator]() {
+        return {
+          current: 1,
+          last: 5,
+          async next() {
+            await setTimeout(0);
+            if (this.current <= this.last) {
+              return { done: false, value: this.current++ };
+            } else {
+              return { done: true, value: undefined };
+            }
+          },
+        };
+      },
+    };
+
+    let sum = 0;
+    await forAwait(range, (value) => (sum += value));
+    await setTimeout(10); // ugh...
+    expect(sum).toBe(15);
   });
 });
