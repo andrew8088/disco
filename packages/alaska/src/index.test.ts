@@ -3,7 +3,11 @@ import { createMachine } from ".";
 
 describe("createMachine", () => {
   it("works", () => {
-    const machine = createMachine({
+    const machine = createMachine<{
+      start: void;
+      increment: number;
+      stop: void;
+    }>()({
       data: { count: 0 },
       initial: "idle",
       states: {
@@ -15,8 +19,8 @@ describe("createMachine", () => {
         running: {
           on: {
             increment: {
-              do: (data) => {
-                data.count += 1;
+              do: (data, payload) => {
+                data.count += payload;
               },
             },
             stop: {
@@ -28,17 +32,17 @@ describe("createMachine", () => {
     });
 
     expect(machine.state).toBe("idle");
-    machine.send("increment");
+    machine.send("increment", 1);
     expect(machine.data.count).toBe(0);
-    machine.send("start");
+    machine.send("start", undefined);
     expect(machine.state).toBe("running");
-    machine.send("increment");
+    machine.send("increment", 1);
     expect(machine.data.count).toBe(1);
-    machine.send("increment");
-    expect(machine.data.count).toBe(2);
-    machine.send("stop");
+    machine.send("increment", 5);
+    expect(machine.data.count).toBe(6);
+    machine.send("stop", undefined);
     expect(machine.state).toBe("idle");
-    machine.send("increment");
-    expect(machine.data.count).toBe(2);
+    machine.send("increment", 1);
+    expect(machine.data.count).toBe(6);
   });
 });
