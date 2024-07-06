@@ -22,36 +22,33 @@ type StateMachine<TData, TEvents> = {
 };
 
 export function createMachine<TEvents>() {
-  return <TData, TStateKey extends string>(stateConfig: StateConfig<TData, TStateKey, TEvents>) =>
-    _createMachine(stateConfig);
-}
+  return function <TData, TStateKey extends string>(
+    stateConfig: StateConfig<TData, TStateKey, TEvents>,
+  ): StateMachine<TData, TEvents> {
+    let currentState = stateConfig.initial;
 
-function _createMachine<TData, TStateKey extends string, TEvents>(
-  stateConfig: StateConfig<TData, TStateKey, TEvents>,
-): StateMachine<TData, TEvents> {
-  let currentState = stateConfig.initial;
+    return {
+      get data() {
+        return stateConfig.data;
+      },
 
-  return {
-    get data() {
-      return stateConfig.data;
-    },
+      get state() {
+        return currentState;
+      },
+      send<E extends keyof TEvents>(...[eventName, payload]: TEvents[E] extends never ? [E] : [E, TEvents[E]]) {
+        const currentStateConfig = stateConfig.states[currentState];
 
-    get state() {
-      return currentState;
-    },
-    send<E extends keyof TEvents>(...[eventName, payload]: TEvents[E] extends never ? [E] : [E, TEvents[E]]) {
-      const currentStateConfig = stateConfig.states[currentState];
+        if (currentStateConfig.on?.[eventName]) {
+          const eventConfig = currentStateConfig.on[eventName];
 
-      if (currentStateConfig.on?.[eventName]) {
-        const eventConfig = currentStateConfig.on[eventName];
-
-        if (eventConfig.do) {
-          eventConfig.do(stateConfig.data, payload as never);
+          if (eventConfig.do) {
+            eventConfig.do(stateConfig.data, payload as never);
+          }
+          if (eventConfig.to) {
+            currentState = eventConfig.to;
+          }
         }
-        if (eventConfig.to) {
-          currentState = eventConfig.to;
-        }
-      }
-    },
+      },
+    };
   };
 }
