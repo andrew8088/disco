@@ -2,11 +2,13 @@ type StateConfig<TData, TStateKey extends string, TEvents> = {
   data: TData;
   initial: NoInfer<TStateKey>;
   states: {
-    [key in TStateKey]: {
+    [Key in TStateKey]: {
       on?: {
-        [eventName in keyof TEvents]?: {
+        [E in keyof TEvents]?: {
           to?: NoInfer<TStateKey>;
-          do?: (data: NoInfer<TData>, payload: TEvents[eventName]) => void;
+          do?: TEvents[E] extends never
+            ? (data: NoInfer<TData>) => void
+            : (data: NoInfer<TData>, payload: TEvents[E]) => void;
         };
       };
     };
@@ -16,7 +18,7 @@ type StateConfig<TData, TStateKey extends string, TEvents> = {
 type StateMachine<TData, TEvents> = {
   data: TData;
   state: string;
-  send: <K extends keyof TEvents>(eventName: K, payload: TEvents[K]) => void;
+  send: <E extends keyof TEvents>(...args: TEvents[E] extends never ? [E] : [E, TEvents[E]]) => void;
 };
 
 export function createMachine<TEvents>() {
@@ -37,14 +39,14 @@ function _createMachine<TData, TStateKey extends string, TEvents>(
     get state() {
       return currentState;
     },
-    send<K extends keyof TEvents>(eventName: K, payload: TEvents[K]) {
+    send<E extends keyof TEvents>(...[eventName, payload]: TEvents[E] extends never ? [E] : [E, TEvents[E]]) {
       const currentStateConfig = stateConfig.states[currentState];
 
       if (currentStateConfig.on?.[eventName]) {
         const eventConfig = currentStateConfig.on[eventName];
 
         if (eventConfig.do) {
-          eventConfig.do(stateConfig.data, payload);
+          eventConfig.do(stateConfig.data, payload as never);
         }
         if (eventConfig.to) {
           currentState = eventConfig.to;

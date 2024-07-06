@@ -4,9 +4,9 @@ import { createMachine } from ".";
 describe("createMachine", () => {
   it("works", () => {
     const machine = createMachine<{
-      start: void;
+      start: never;
       increment: number;
-      stop: void;
+      stop: never;
     }>()({
       data: { count: 0 },
       initial: "idle",
@@ -34,13 +34,13 @@ describe("createMachine", () => {
     expect(machine.state).toBe("idle");
     machine.send("increment", 1);
     expect(machine.data.count).toBe(0);
-    machine.send("start", undefined);
+    machine.send("start");
     expect(machine.state).toBe("running");
     machine.send("increment", 1);
     expect(machine.data.count).toBe(1);
     machine.send("increment", 5);
     expect(machine.data.count).toBe(6);
-    machine.send("stop", undefined);
+    machine.send("stop");
     expect(machine.state).toBe("idle");
     machine.send("increment", 1);
     expect(machine.data.count).toBe(6);
