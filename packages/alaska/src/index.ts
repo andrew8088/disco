@@ -61,6 +61,9 @@ export function createMachine<TEvents>() {
             if (eventConfig.if && !eventConfig.if(currentData)) {
               return;
             }
+            if (eventConfig.unless && eventConfig.unless(currentData)) {
+              return;
+            }
 
             const nextData = Object.assign({}, currentData);
             eventConfig.do(nextData, payload as never);
@@ -69,6 +72,9 @@ export function createMachine<TEvents>() {
           }
           if (eventConfig.to) {
             if (eventConfig.if && !eventConfig.if(currentData)) {
+              return;
+            }
+            if (eventConfig.unless && eventConfig.unless(currentData)) {
               return;
             }
             currentState = eventConfig.to;
