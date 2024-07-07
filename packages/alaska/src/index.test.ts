@@ -7,23 +7,31 @@ function getMachine() {
     start: never;
     increment: number;
     stop: never;
+    setMax: number;
   }>()({
-    data: { count: 0 },
+    data: { count: 0, max: 10 },
     initial: "idle",
     states: {
       idle: {
         on: {
           start: { to: "running" },
+          setMax: {
+            do: (data, payload) => {
+              data.max = payload;
+            },
+          },
         },
       },
       running: {
         on: {
           increment: {
+            if: (data) => data.count < data.max,
             do: (data, payload) => {
               data.count += payload;
             },
           },
           stop: {
+            if: (data) => data.count > 0,
             to: "idle",
           },
         },
@@ -66,5 +74,20 @@ describe("createMachine", () => {
     await waitUntilCountSync(values, 3);
 
     expect(values).toEqual([1, 3, 6]);
+  });
+
+  it("handles if condition on `do`", () => {
+    const machine = getMachine();
+    machine.send("setMax", 3);
+    machine.send("start");
+    machine.send("increment", 5);
+    machine.send("increment", 5);
+    expect(machine.data.count).toBe(5);
+  });
+  it("handles if condition on `to`", () => {
+    const machine = getMachine();
+    machine.send("start");
+    machine.send("stop");
+    expect(machine.state).toBe("running");
   });
 });

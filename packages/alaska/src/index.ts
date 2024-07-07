@@ -5,6 +5,8 @@ type StateConfig<TData, TStateKey extends string, TEvents> = {
     [Key in TStateKey]: {
       on?: {
         [E in keyof TEvents]?: {
+          if?: (data: NoInfer<TData>) => boolean;
+          unless?: (data: NoInfer<TData>) => boolean;
           to?: NoInfer<TStateKey>;
           do?: TEvents[E] extends never
             ? (data: NoInfer<TData>) => void
@@ -56,12 +58,19 @@ export function createMachine<TEvents>() {
           const eventConfig = currentStateConfig.on[eventName];
 
           if (eventConfig.do) {
+            if (eventConfig.if && !eventConfig.if(currentData)) {
+              return;
+            }
+
             const nextData = Object.assign({}, currentData);
             eventConfig.do(nextData, payload as never);
             // check for changes?
             setUpdate(nextData);
           }
           if (eventConfig.to) {
+            if (eventConfig.if && !eventConfig.if(currentData)) {
+              return;
+            }
             currentState = eventConfig.to;
           }
         }
