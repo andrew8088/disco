@@ -1,3 +1,5 @@
+import { setImmediate } from "node:timers/promises";
+
 export const noop = () => undefined;
 
 export function deferred<T, E = unknown>() {
@@ -71,5 +73,13 @@ function defineName<T>(t: T, value: string) {
 export async function forAwait<T>(iter: AsyncIterable<T>, fn: (t: T) => unknown | Promise<unknown>) {
   for await (const t of iter) {
     await fn(t);
+  }
+}
+
+export async function waitUntilCountSync<T>(iter: Iterable<T>, count: number) {
+  let arr = [];
+  while (arr.length < count) {
+    await setImmediate();
+    arr = [...iter];
   }
 }

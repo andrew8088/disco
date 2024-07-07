@@ -1,6 +1,6 @@
-import { setTimeout } from "node:timers/promises";
+import { setTimeout, setImmediate } from "node:timers/promises";
 import { it, expect, describe } from "vitest";
-import { createErrorClass, deferred, pipe, pipeAsync, forAwait } from "./index";
+import { createErrorClass, deferred, pipe, pipeAsync, forAwait, waitUntilCountSync } from "./index";
 
 describe("deferred", () => {
   it("resolves the promise", () => {
@@ -87,7 +87,7 @@ describe("forAwait", () => {
           current: 1,
           last: 5,
           async next() {
-            await setTimeout(0);
+            await setImmediate();
             if (this.current <= this.last) {
               return { done: false, value: this.current++ };
             } else {
@@ -102,5 +102,29 @@ describe("forAwait", () => {
     await forAwait(range, (value) => (sum += value));
     await setTimeout(10); // ugh...
     expect(sum).toBe(15);
+  });
+});
+
+describe("waitUntilCountSync", () => {
+  it("works", async () => {
+    const arr: number[] = [];
+
+    let complete = false;
+    waitUntilCountSync(arr, 5).then(() => {
+      complete = true;
+    });
+
+    while (!complete) {
+      arr.push(0);
+      await setImmediate();
+    }
+
+    expect(arr.length).toBe(5);
+  });
+
+  it("ends if count is greater than expected", async () => {
+    const arr = [1, 2, 3, 4, 5, 6];
+    await waitUntilCountSync(arr, 5);
+    expect(arr.length).toBe(6);
   });
 });
