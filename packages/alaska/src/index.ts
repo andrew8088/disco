@@ -19,6 +19,7 @@ type StateMachine<TData, TEvents> = {
   data: TData;
   state: string;
   send: <E extends keyof TEvents>(...args: TEvents[E] extends never ? [E] : [E, TEvents[E]]) => void;
+  [Symbol.asyncIterator]: () => AsyncIterator<TData>;
 };
 
 export function createMachine<TEvents>() {
@@ -26,10 +27,23 @@ export function createMachine<TEvents>() {
     stateConfig: StateConfig<TData, TStateKey, TEvents>,
   ): StateMachine<TData, TEvents> {
     let currentState = stateConfig.initial;
+    let currentData = stateConfig.data;
+    let resolve: ((value: IteratorResult<TData, never>) => void) | null = null;
+    const queue: Array<TData> = [];
+
+    function setUpdate(data: TData) {
+      currentData = data;
+      if (resolve) {
+        resolve({ value: data, done: false });
+        resolve = null;
+      } else {
+        queue.push(data);
+      }
+    }
 
     return {
       get data() {
-        return stateConfig.data;
+        return currentData;
       },
 
       get state() {
@@ -42,13 +56,29 @@ export function createMachine<TEvents>() {
           const eventConfig = currentStateConfig.on[eventName];
 
           if (eventConfig.do) {
-            eventConfig.do(stateConfig.data, payload as never);
+            const nextData = Object.assign({}, currentData);
+            eventConfig.do(nextData, payload as never);
+            // check for changes?
+            setUpdate(nextData);
           }
           if (eventConfig.to) {
             currentState = eventConfig.to;
           }
         }
       },
+
+      [Symbol.asyncIterator]: () => ({
+        next: () => {
+          const value = queue.shift();
+          if (value) {
+            return Promise.resolve({ value: value, done: false });
+          }
+
+          const d = Promise.withResolvers<IteratorResult<TData, never>>();
+          resolve = d.resolve;
+          return d.promise;
+        },
+      }),
     };
   };
 }
