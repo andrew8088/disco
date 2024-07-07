@@ -58,10 +58,7 @@ export function createMachine<TEvents>() {
           const eventConfig = currentStateConfig.on[eventName];
 
           if (eventConfig.do) {
-            if (eventConfig.if && !eventConfig.if(currentData)) {
-              return;
-            }
-            if (eventConfig.unless && eventConfig.unless(currentData)) {
+            if (eventConfig.if?.(currentData) === false || eventConfig.unless?.(currentData)) {
               return;
             }
 
@@ -71,10 +68,7 @@ export function createMachine<TEvents>() {
             setUpdate(nextData);
           }
           if (eventConfig.to) {
-            if (eventConfig.if && !eventConfig.if(currentData)) {
-              return;
-            }
-            if (eventConfig.unless && eventConfig.unless(currentData)) {
+            if (eventConfig.if?.(currentData) === false || eventConfig.unless?.(currentData)) {
               return;
             }
             currentState = eventConfig.to;
