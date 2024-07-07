@@ -1,17 +1,17 @@
+type EventConfig<TStateKey, TData, TPayload> = {
+  if?: (data: TData) => boolean;
+  unless?: (data: TData) => boolean;
+  to?: TStateKey;
+  do?: TPayload extends never ? (data: TData) => void : (data: TData, payload: TPayload) => void;
+};
+
 type StateConfig<TData, TStateKey extends string, TEvents> = {
   data: TData;
   initial: NoInfer<TStateKey>;
   states: {
     [Key in TStateKey]: {
       on?: {
-        [E in keyof TEvents]?: {
-          if?: (data: NoInfer<TData>) => boolean;
-          unless?: (data: NoInfer<TData>) => boolean;
-          to?: NoInfer<TStateKey>;
-          do?: TEvents[E] extends never
-            ? (data: NoInfer<TData>) => void
-            : (data: NoInfer<TData>, payload: TEvents[E]) => void;
-        };
+        [E in keyof TEvents]?: EventConfig<NoInfer<TStateKey>, NoInfer<TData>, TEvents[E]>;
       };
     };
   };
@@ -43,6 +43,12 @@ export function createMachine<TEvents>() {
       }
     }
 
+    function canRun<K extends TStateKey, TPayload>(eventConfig: EventConfig<K, TData, TPayload>) {
+      const ifCondition = eventConfig.if?.(currentData) ?? true;
+      const unlessCondition = eventConfig.unless?.(currentData) ?? false;
+      return ifCondition && !unlessCondition;
+    }
+
     return {
       get data() {
         return currentData;
@@ -57,20 +63,17 @@ export function createMachine<TEvents>() {
         if (currentStateConfig.on?.[eventName]) {
           const eventConfig = currentStateConfig.on[eventName];
 
-          if (eventConfig.do) {
-            if (eventConfig.if?.(currentData) === false || eventConfig.unless?.(currentData)) {
-              return;
-            }
+          if (!canRun(eventConfig)) {
+            return;
+          }
 
+          if (eventConfig.do) {
             const nextData = Object.assign({}, currentData);
             eventConfig.do(nextData, payload as never);
             // check for changes?
             setUpdate(nextData);
           }
           if (eventConfig.to) {
-            if (eventConfig.if?.(currentData) === false || eventConfig.unless?.(currentData)) {
-              return;
-            }
             currentState = eventConfig.to;
           }
         }
