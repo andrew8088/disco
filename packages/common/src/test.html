@@ -1,0 +1,82 @@
+<body style="background-color: black">
+  <svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="1920" height="1080" style="fill: #f7df1e" />
+  </svg>
+  <script>
+    const yellows = [
+      "#fff9c4",
+      "#fff176",
+      "#ffee58",
+      "#fdd835",
+      // '#fbc02d',
+      "#FAC340",
+    ];
+    const pastelColors = [
+      "#F7E1AE", // Pastel Yellow
+      "#FFDDC1", // Pastel Peach
+      "#FFCCCB", // Pastel Pink
+      "#C4E3F3", // Pastel Blue
+      "#D3F6DB", // Pastel Green
+      "#FFDEDE", // Pastel Coral
+      "#D8BFD8", // Thistle (light purple)
+      "#E6E6FA", // Lavender
+      "#FADADD", // Pale Pink
+      "#F5E6E8", // Pale Rose
+    ];
+
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function nearest(x, y) {
+      return Math.floor(x / y) * y;
+    }
+
+    function randomYellow() {
+      return yellows[getRandomInt(0, yellows.length - 1)];
+    }
+
+    const svg = document.querySelector("svg");
+
+    // margin = 9, height = 42, rowCount = 21
+    const HEIGHT = 42;
+    const MARGIN = 9;
+    const RADIUS = HEIGHT / 2;
+
+    let x = 0 - HEIGHT;
+    let y = MARGIN;
+
+    while (true) {
+      const nextWidth = nearest(getRandomInt(101, 501), 100);
+
+      if (x > 1920) {
+        x = 0 - HEIGHT;
+        y += MARGIN + HEIGHT;
+      }
+
+      const rect = getRect(x, y, nextWidth);
+
+      x += nextWidth + MARGIN;
+      // const rect = getRect(MARGIN, MARGIN+ i * (HEIGHT + MARGIN), nextWidth);
+      svg.appendChild(rect);
+
+      if (y >= 1080) {
+        break;
+      }
+    }
+
+    function getRect(x, y, width) {
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", x);
+      rect.setAttribute("y", y);
+      rect.setAttribute("width", width);
+      rect.setAttribute("height", HEIGHT);
+      rect.setAttribute("rx", RADIUS);
+      rect.setAttribute("ry", RADIUS);
+      rect.setAttribute("fill", randomYellow());
+      return rect;
+    }
+  </script>
+</body>

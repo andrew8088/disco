@@ -1,11 +1,4 @@
-export function compare<T>(a: NoInfer<T>, b: T): number {
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-}
-
-export const a = compare("1", "string");
-
+// menu example {{{
 export function createMenu<T extends string>(list: T[], initial: NoInfer<T>) {
   let idx = list.findIndex((i) => i === initial);
 
@@ -24,8 +17,11 @@ export function createMenu<T extends string>(list: T[], initial: NoInfer<T>) {
   };
 }
 
-export const menu = createMenu(["new", "open", "save"], "close");
+export const menu = createMenu(["new", "open", "save"], "new");
 
+// }}}
+
+// user example {{{
 type StandardUser = {
   type: "standard";
 };
@@ -37,6 +33,8 @@ type AdminUser = {
 type UnauthenticatedUser = {
   type: "unauthed";
 };
+
+type User = StandardUser | AdminUser | UnauthenticatedUser;
 
 export function getUser(): StandardUser | AdminUser {
   return { type: "admin" };
@@ -50,8 +48,10 @@ export const user1 = getUser();
 
 export const user2 = getSession();
 
-export function isTypeOfUser<T extends string>(user: { type: T }, type: NoInfer<T>) {
+function isTypeOfUser<T extends User["type"]>(user: { type: T }, type: NoInfer<T>) {
   return user.type === type;
 }
 
-isTypeOfUser(user2, "admin");
+isTypeOfUser(user1, "admin");
+
+isTypeOfUser(user2, "standard");
