@@ -23,7 +23,7 @@
     "unbuild": "^2.0.0",
     "unimport": "^3.7.1",
     "vite-plugin-dts": "^3.7.3",
-    "vitest": "^1.6.0"
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@disco/common": "workspace:^",
