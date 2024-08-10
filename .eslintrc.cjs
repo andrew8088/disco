@@ -38,4 +38,5 @@ module.exports = {
       },
     ],
   },
+  ignores: ["coverage", "public", "dist", "pnpm-lock.yaml", "pnpm-workspace.yaml"],
 };
