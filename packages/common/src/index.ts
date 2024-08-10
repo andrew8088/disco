@@ -60,7 +60,10 @@ export function createErrorClass<T>(tag: string, ParentError = ApplicationError<
   return [ErrClass, createErrInstance] as const;
 }
 
-export function nameFn<T extends (...args: never[]) => unknown>(name: string | undefined, fn: T): T {
+export function nameFn<T extends (...args: never[]) => unknown>(
+  name: string | undefined,
+  fn: T,
+): T {
   if (!name) return fn;
   defineName(fn, name);
   return fn;
@@ -70,7 +73,10 @@ function defineName<T>(t: T, value: string) {
   Object.defineProperty(t, "name", { value });
 }
 
-export async function forAwait<T>(iter: AsyncIterable<T>, fn: (t: T) => unknown | Promise<unknown>) {
+export async function forAwait<T>(
+  iter: AsyncIterable<T>,
+  fn: (t: T) => unknown | Promise<unknown>,
+) {
   for await (const t of iter) {
     await fn(t);
   }

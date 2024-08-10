@@ -3,7 +3,11 @@ import { nameFn } from "@disco/common";
 
 export type UturnResponse = Writable & { statusCode: number };
 
-type Handler<Req, Res, Ctx, NextCtx> = (req: Req, res: Res, ctx: Ctx) => NextCtx | PromiseLike<NextCtx>;
+type Handler<Req, Res, Ctx, NextCtx> = (
+  req: Req,
+  res: Res,
+  ctx: Ctx,
+) => NextCtx | PromiseLike<NextCtx>;
 
 export type Uturn<Req, Res, Ctx, NextCtx> = {
   (req: Req, res: Res, ctx: Ctx): NextCtx | PromiseLike<NextCtx>;
@@ -18,7 +22,9 @@ export function uturn<Req, Res>() {
   };
 }
 
-function _uturn<Req, Res, Ctx, NextCtx>(next: Handler<Req, Res, Ctx, NextCtx>): Uturn<Req, Res, Ctx, NextCtx> {
+function _uturn<Req, Res, Ctx, NextCtx>(
+  next: Handler<Req, Res, Ctx, NextCtx>,
+): Uturn<Req, Res, Ctx, NextCtx> {
   function app(req: Req, res: Res, ctx: Ctx) {
     return next(req, res, ctx);
   }

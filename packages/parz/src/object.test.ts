@@ -131,7 +131,9 @@ describe("object", () => {
         },
       }),
     );
-    expect(err.errors[0]).toBe('key `one`: key `two`: key `three`: key `four`: key `five`: value `"43"` is not "42"');
+    expect(err.errors[0]).toBe(
+      'key `one`: key `two`: key `three`: key `four`: key `five`: value `"43"` is not "42"',
+    );
   });
 
   it("mock", () => {

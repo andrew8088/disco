@@ -123,13 +123,22 @@ describe("manucci", () => {
   });
 
   it("serializes entries", async () => {
-    const trx = await ledger.addTransaction({ from: "Alice", to: "Bob", amount: 100, note: "for pizza" });
+    const trx = await ledger.addTransaction({
+      from: "Alice",
+      to: "Bob",
+      amount: 100,
+      note: "for pizza",
+    });
 
     const accounts = ledger.serializeAccounts();
     const entries = ledger.serializeEntries();
 
-    const aliceEntry = entries.find((e) => accounts.find((a) => a.accountId === e.accountId)?.name === "Alice");
-    const bobEntry = entries.find((e) => accounts.find((a) => a.accountId === e.accountId)?.name === "Bob");
+    const aliceEntry = entries.find(
+      (e) => accounts.find((a) => a.accountId === e.accountId)?.name === "Alice",
+    );
+    const bobEntry = entries.find(
+      (e) => accounts.find((a) => a.accountId === e.accountId)?.name === "Bob",
+    );
 
     for (const entry of entries) {
       expect(entry.transactionId).toBe(trx.transactionId);

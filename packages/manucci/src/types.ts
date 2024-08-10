@@ -37,4 +37,6 @@ export type ComplexTransactionCreatePayload = (
     }
 )[];
 
-export type TransactionCreatePayload = SimpleTransactionCreatePayload | ComplexTransactionCreatePayload;
+export type TransactionCreatePayload =
+  | SimpleTransactionCreatePayload
+  | ComplexTransactionCreatePayload;

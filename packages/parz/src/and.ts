@@ -3,7 +3,9 @@ import { SchemaError, type UnionToIntersection, type FlatType, handleError } fro
 
 export default function and<D extends Array<Parz<T>>, T>(parsers: D) {
   return {
-    parse(value: unknown): FlatType<UnionToIntersection<{ [K in keyof D]: ReturnType<D[K]["parse"]> }[number]>> {
+    parse(
+      value: unknown,
+    ): FlatType<UnionToIntersection<{ [K in keyof D]: ReturnType<D[K]["parse"]> }[number]>> {
       const errors = [];
       for (const parser of parsers) {
         try {

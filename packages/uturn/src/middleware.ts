@@ -22,7 +22,9 @@ type WriteMethod = (typeof WRITE_METHODS)[number];
 type SupportedMethod = ReadMethod | WriteMethod;
 
 function isSupportedMethod(method: string): method is SupportedMethod {
-  return READ_METHODS.includes(method as ReadMethod) || WRITE_METHODS.includes(method as WriteMethod);
+  return (
+    READ_METHODS.includes(method as ReadMethod) || WRITE_METHODS.includes(method as WriteMethod)
+  );
 }
 
 function isWriteMethod(method: SupportedMethod): method is WriteMethod {
@@ -60,7 +62,9 @@ export function parseMethodAndBody<Req extends IncomingMessage, Res, T>(
   return promise;
 }
 
-export function handleErrors<Req, Res extends Writable & { statusCode: number }>(app: Uturn<Req, Res, void, void>) {
+export function handleErrors<Req, Res extends Writable & { statusCode: number }>(
+  app: Uturn<Req, Res, void, void>,
+) {
   return async function handleUturnErrors(req: Req, res: Res) {
     try {
       await app(req, res);

@@ -1,7 +1,9 @@
 import { Parz, ParzObject } from "./types";
 import { SchemaError, handleError } from "./utils";
 
-export default function object<Def extends Record<string, Parz<T>>, T>(definition: Def): ParzObject<Def> {
+export default function object<Def extends Record<string, Parz<T>>, T>(
+  definition: Def,
+): ParzObject<Def> {
   return {
     parse(value: unknown): {
       [K in keyof Def]: ReturnType<Def[K]["parse"]>;

@@ -5,8 +5,14 @@ type ErrCode = string;
 export const [UturnParseError] = createErrorClass("UturnParseError");
 export const [HttpResponseError] = createErrorClass<ErrCode>("HttpResponseError");
 
-export const [BadResponseError, BadResponse] = createErrorClass("BadResponseError", HttpResponseError);
-export const [UnauthorizedError, Unauthorized] = createErrorClass("UnauthorizedError", HttpResponseError);
+export const [BadResponseError, BadResponse] = createErrorClass(
+  "BadResponseError",
+  HttpResponseError,
+);
+export const [UnauthorizedError, Unauthorized] = createErrorClass(
+  "UnauthorizedError",
+  HttpResponseError,
+);
 export const [ForbiddenError, Forbidden] = createErrorClass("ForbiddenError", HttpResponseError);
 export const [NotFoundError, NotFound] = createErrorClass("NotFoundError", HttpResponseError);
 

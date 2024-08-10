@@ -36,7 +36,10 @@ export abstract class SqliteReader<From, To> {
       return ["", []];
     }
 
-    return ["WHERE " + this.#whereClauses.map((f) => `${String(f)} = ?`).join(" AND "), this.#whereValues];
+    return [
+      "WHERE " + this.#whereClauses.map((f) => `${String(f)} = ?`).join(" AND "),
+      this.#whereValues,
+    ];
   }
 
   async findOne(): Promise<To> {
@@ -47,7 +50,9 @@ export abstract class SqliteReader<From, To> {
     }
 
     if (rows.length > 1) {
-      throw new TooManyFoundError(`Too many rows found: ${rows.length} instead of 1`, { query: this.#getQuery() });
+      throw new TooManyFoundError(`Too many rows found: ${rows.length} instead of 1`, {
+        query: this.#getQuery(),
+      });
     }
 
     return (await this.transform([rows[0]]))[0];

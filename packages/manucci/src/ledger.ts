@@ -107,7 +107,12 @@ export class Ledger extends Hookable<{ [K in keyof LedgerHooks]: (arg: LedgerHoo
       ledgerId: this.ledgerId,
       transactionId,
       entries: [
-        this.#toEntry(transactionId, transaction.from, 0 - transaction.amount, transaction.note ?? ""),
+        this.#toEntry(
+          transactionId,
+          transaction.from,
+          0 - transaction.amount,
+          transaction.note ?? "",
+        ),
         this.#toEntry(transactionId, transaction.to, transaction.amount),
       ],
       createdAt: new Date(),

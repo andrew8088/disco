@@ -2,7 +2,10 @@ import { SchemaError, handleError } from "./utils";
 import object from "./object";
 import { Parz } from "./types";
 
-export default function record<K extends string | number, V>(key: Parz<K>, value: Parz<V>): Parz<Record<K, V>> {
+export default function record<K extends string | number, V>(
+  key: Parz<K>,
+  value: Parz<V>,
+): Parz<Record<K, V>> {
   return {
     parse(input: unknown): Record<K, V> {
       const errors = [];

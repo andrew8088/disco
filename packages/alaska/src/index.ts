@@ -21,7 +21,9 @@ type StateConfig<TData, TStateKey extends string, TEvents> = {
 type StateMachine<TData, TEvents> = {
   data: TData;
   state: string;
-  send: <E extends keyof TEvents>(...args: TEvents[E] extends never ? [E] : [E, TEvents[E]]) => void;
+  send: <E extends keyof TEvents>(
+    ...args: TEvents[E] extends never ? [E] : [E, TEvents[E]]
+  ) => void;
   [Symbol.asyncIterator]: () => AsyncIterator<TData>;
 };
 
@@ -58,7 +60,9 @@ export function createMachine<TEvents>() {
       get state() {
         return currentState;
       },
-      send<E extends keyof TEvents>(...[eventName, payload]: TEvents[E] extends never ? [E] : [E, TEvents[E]]) {
+      send<E extends keyof TEvents>(
+        ...[eventName, payload]: TEvents[E] extends never ? [E] : [E, TEvents[E]]
+      ) {
         const currentStateConfig = stateConfig.states[currentState];
 
         if (currentStateConfig.on?.[eventName]) {

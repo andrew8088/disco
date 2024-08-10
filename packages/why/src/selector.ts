@@ -35,17 +35,29 @@ export default class Selector<
     return new Selector(newTables, this.#outShape, this.#selections);
   }
 
-  field<K extends keyof Tables, F extends ParzKeys<Tables[K]>, T extends string>(table: K, field: F, rename: T) {
+  field<K extends keyof Tables, F extends ParzKeys<Tables[K]>, T extends string>(
+    table: K,
+    field: F,
+    rename: T,
+  ) {
     const parser = this.#tables[table].field(field);
-    const partial: OutShape & { [X in T]: ParzValues<Tables[K], F> } = { ...this.#outShape, [rename]: parser } as never;
+    const partial: OutShape & { [X in T]: ParzValues<Tables[K], F> } = {
+      ...this.#outShape,
+      [rename]: parser,
+    } as never;
     return new Selector(this.#tables, partial, this.#selections);
   }
 
-  select<K extends keyof Tables, F extends ParzKeys<Tables[K]>, T extends string>(arg: Selectable<K, F, T>) {
+  select<K extends keyof Tables, F extends ParzKeys<Tables[K]>, T extends string>(
+    arg: Selectable<K, F, T>,
+  ) {
     const [table, field, rename] = this.#parseParts(arg as never);
 
     const parser = this.#tables[table].field(field);
-    const partial: OutShape & { [X in T]: ParzValues<Tables[K], F> } = { ...this.#outShape, [rename]: parser } as never;
+    const partial: OutShape & { [X in T]: ParzValues<Tables[K], F> } = {
+      ...this.#outShape,
+      [rename]: parser,
+    } as never;
     return new Selector(this.#tables, partial, [...this.#selections, arg]);
   }
 

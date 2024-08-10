@@ -18,7 +18,10 @@ const widget = z.object({
 
 describe("Selector", () => {
   it("creates a parser for the selected fields", () => {
-    const [parser] = new Selector({ user, widget }).select("user.id as userId").select("widget.id as widgetId").value();
+    const [parser] = new Selector({ user, widget })
+      .select("user.id as userId")
+      .select("widget.id as widgetId")
+      .value();
 
     const val = parser.parse({});
 

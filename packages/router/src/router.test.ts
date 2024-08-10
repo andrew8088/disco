@@ -57,7 +57,9 @@ describe("router", () => {
   it("parses url params", async () => {
     const [client, server] = await getClientAndServer();
 
-    createRouter(server).get("/user/:userId", ({ params }) => ok(params.userId.toLocaleUpperCase()));
+    createRouter(server).get("/user/:userId", ({ params }) =>
+      ok(params.userId.toLocaleUpperCase()),
+    );
 
     await assertResponse(client.get("/user/andrew"), "ANDREW");
   });
@@ -113,7 +115,11 @@ describe("router", () => {
   });
 });
 
-async function assertResponse(req: Promise<Response>, expectedBody: string, expectedStatusCode?: number) {
+async function assertResponse(
+  req: Promise<Response>,
+  expectedBody: string,
+  expectedStatusCode?: number,
+) {
   const res = await req;
   const actual = await res.text();
   expect(actual).toEqual(expectedBody);
