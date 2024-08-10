@@ -14,7 +14,12 @@ function getMachine() {
     states: {
       idle: {
         on: {
-          start: { to: "running" },
+          start: {
+            to: "running",
+            do: (data, payload) => {
+              console.log(data, payload);
+            },
+          },
           setMax: {
             do: (data, payload) => {
               data.max = payload;

@@ -1,11 +1,3 @@
-type EventConfig<TStateKey, TData, TPayload> = {
-  if?: (data: TData) => boolean;
-  unless?: (data: TData) => boolean;
-  to?: TStateKey;
-  do?: TPayload extends never ? (data: TData) => void : (data: TData, payload: TPayload) => void;
-  // do?: (...args: TPayload extends never ? [TData] : [TData, TPayload]) => void;
-};
-
 type StateConfig<TData, TStateKey extends string, TEvents> = {
   data: TData;
   initial: NoInfer<TStateKey>;
@@ -16,6 +8,15 @@ type StateConfig<TData, TStateKey extends string, TEvents> = {
       };
     };
   };
+};
+
+type EventConfig<TStateKey, TData, TPayload> = {
+  if?: (data: TData) => boolean;
+  unless?: (data: TData) => boolean;
+  to?: TStateKey;
+  do?: [TPayload] extends [never]
+    ? (data: TData, payload?: undefined) => void
+    : (data: TData, payload: TPayload) => void;
 };
 
 type StateMachine<TData, TEvents> = {
@@ -74,7 +75,8 @@ export function createMachine<TEvents>() {
 
           if (eventConfig.do) {
             const nextData = Object.assign({}, currentData);
-            eventConfig.do(nextData, payload as never);
+            // @ts-ignore
+            eventConfig.do(nextData, payload);
             // check for changes?
             setUpdate(nextData);
           }
