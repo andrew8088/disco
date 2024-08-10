@@ -3,6 +3,7 @@ type EventConfig<TStateKey, TData, TPayload> = {
   unless?: (data: TData) => boolean;
   to?: TStateKey;
   do?: TPayload extends never ? (data: TData) => void : (data: TData, payload: TPayload) => void;
+  // do?: (...args: TPayload extends never ? [TData] : [TData, TPayload]) => void;
 };
 
 type StateConfig<TData, TStateKey extends string, TEvents> = {
