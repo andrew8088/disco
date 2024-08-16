@@ -75,7 +75,7 @@ export function createMachine<TEvents>() {
 
           if (eventConfig.do) {
             const nextData = Object.assign({}, currentData);
-            // @ts-ignore
+            // @ts-expect-error the usual library stuff
             eventConfig.do(nextData, payload);
             // check for changes?
             setUpdate(nextData);

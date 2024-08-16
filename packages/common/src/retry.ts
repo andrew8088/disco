@@ -22,7 +22,6 @@ export class Retry {
   }
 
   async run<T>(fn: () => Promise<T>): Promise<T> {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         return await fn();
