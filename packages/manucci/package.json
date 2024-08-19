@@ -11,18 +11,18 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.9",
+    "@types/better-sqlite3": "^7.6.11",
     "@types/uuid": "^9.0.8",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.4",
-    "vite-plugin-dts": "^3.7.3",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.1",
+    "vite-plugin-dts": "^3.9.1",
     "vitest": "catalog:"
   },
   "dependencies": {
     "@disco/common": "workspace:^",
     "@disco/parz": "workspace:^",
     "@disco/test-utils": "workspace:^",
-    "better-sqlite3": "^9.5.0",
+    "better-sqlite3": "^9.6.0",
     "hookable": "^5.5.3",
     "uuid": "^9.0.1"
   }
