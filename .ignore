@@ -1,1 +1,4 @@
 ./packages/*/tsconfig.tsbuildinfo
+./packages/*/dist
+tsconfig.tsbuildinfo
+dist

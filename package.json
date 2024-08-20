@@ -39,6 +39,6 @@
     "**/*.{js,ts,tsx}": [
       "eslint --fix"
     ],
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*": "prettier --write --ignore-unknown --no-error-on-unmatched-pattern"
   }
 }

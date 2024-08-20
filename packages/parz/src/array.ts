@@ -1,3 +1,4 @@
+import { simpleFaker as faker } from "@faker-js/faker";
 import { Parz } from "./types";
 import { SchemaError, handleError } from "./utils";
 

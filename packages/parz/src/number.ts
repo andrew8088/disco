@@ -1,3 +1,4 @@
+import { simpleFaker as faker } from "@faker-js/faker";
 import { SchemaError } from "./utils";
 
 export default function number() {
