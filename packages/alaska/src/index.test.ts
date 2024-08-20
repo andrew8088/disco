@@ -16,9 +16,6 @@ function getMachine() {
         on: {
           start: {
             to: "running",
-            do: (data, payload) => {
-              console.log(data, payload);
-            },
           },
           setMax: {
             do: (data, payload) => {
