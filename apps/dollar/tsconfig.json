@@ -1,7 +1,5 @@
 {
-	"extends": "@sindresorhus/tsconfig",
-	"compilerOptions": {
-		"outDir": "dist"
-	},
-	"include": ["source"]
+  "extends": "../config/tsconfig.json",
+  "include": ["src"],
+  "exclude": ["node_modules", "../../../node_modules", "src/*.test.ts"]
 }
