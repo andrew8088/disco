@@ -2,10 +2,19 @@
   "name": "@disco/dollar",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.cjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "unbuild",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "pnpm build && node ./dist/index.mjs"
   },
   "keywords": [],
   "author": "",
