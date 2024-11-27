@@ -8,3 +8,5 @@ export type ParzObject<Def extends Record<string, Parz<unknown>>> = Parz<{
 }> & {
   field<K extends keyof Def>(name: K): Def[K];
 };
+
+export type Infer<P extends Parz<unknown>> = ReturnType<P["parse"]>;
