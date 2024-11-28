@@ -21,8 +21,10 @@
   "license": "ISC",
   "dependencies": {
     "@disco/parz": "workspace:^",
+    "@inquirer/core": "^10.1.0",
     "@inquirer/prompts": "^7.1.0",
     "better-sqlite3": "^9.6.0",
+    "date-fns": "^4.1.0",
     "unbuild": "^2.0.0"
   },
   "devDependencies": {

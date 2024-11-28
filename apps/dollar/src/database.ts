@@ -1,30 +1,38 @@
 import Database from "better-sqlite3";
-import * as z from "@disco/parz";
 
-const { DOLLAR_PATH } = process.env;
+let _db: Database.Database | null = null;
 
-if (!DOLLAR_PATH) {
-  throw new Error("DOLLAR_PATH is not set");
+export function getDb() {
+  if (!_db) {
+    const { DOLLAR_PATH } = process.env;
+    if (!DOLLAR_PATH) {
+      throw new Error("DOLLAR_PATH is not set");
+    }
+    _db = new Database(DOLLAR_PATH);
+  }
+
+  return _db;
 }
 
-const db = new Database(DOLLAR_PATH);
+type Id = number | bigint;
 
-export function findAccounts() {
-  const raw = db.prepare("SELECT id, name, type, description FROM accounts").all();
-  return accountParser.parse(raw);
+export function createJournalEntry(date: Date, description: string) {
+  const stmt = getDb().prepare("INSERT INTO journal_entries (date, description) VALUES (?, ?)");
+  const result = stmt.run(date.toISOString(), description);
+  return result.lastInsertRowid;
 }
 
-const accountParser = z.array(
-  z.object({
-    id: z.number(),
-    name: z.string(),
-    type: z.or([
-      z.literal("asset"),
-      z.literal("expense"),
-      z.literal("liability"),
-      z.literal("income"),
-      z.literal("placeholder"),
-    ]),
-    description: z.string(),
-  }),
-);
+export function createTransactions(
+  journalEntryId: Id,
+  amount: number,
+  fromAccountId: Id,
+  toAccountId: Id,
+) {
+  const stmt = getDb().prepare(
+    "INSERT INTO transactions (journal_entry_id, account_id, amount) VALUES (?, ?, ?)",
+  );
+
+  const fromTrxId = stmt.run(journalEntryId, fromAccountId, -1 * amount);
+  const toTrxId = stmt.run(journalEntryId, toAccountId, amount);
+  return { fromTrxId: fromTrxId.lastInsertRowid, toTrxId: toTrxId.lastInsertRowid };
+}
