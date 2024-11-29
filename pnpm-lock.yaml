@@ -59,6 +59,9 @@ importers:
 
   apps/dollar:
     dependencies:
+      '@disco/common':
+        specifier: workspace:^
+        version: link:../../packages/common
       '@disco/parz':
         specifier: workspace:^
         version: link:../../packages/parz
