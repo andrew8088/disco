@@ -1,5 +1,7 @@
 import { setImmediate } from "node:timers/promises";
 
+export { groupBy } from "./groupBy";
+
 export const noop = () => undefined;
 
 export function deferred<T, E = unknown>() {
