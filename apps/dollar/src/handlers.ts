@@ -20,6 +20,13 @@ export async function mortgage(accounts: Array<Account.Account>) {
   );
 }
 
+export async function newExpense() {
+  const name = await input({ message: "Enter a name" });
+  const description = await input({ message: "Enter a description" });
+  const id = Account.create(name, description, "expense");
+  console.log(`✔ created new expense account: ${name} (${id})`);
+}
+
 async function transaction(
   accounts: Array<Account.Account>,
   fromFn: (accounts: Array<Account.Account>) => Array<Account.Account>,
