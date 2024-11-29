@@ -1,31 +1,8 @@
-import { select } from "@inquirer/prompts";
-import * as Account from "./account";
-import * as handlers from "./handlers";
+import * as Template from "./template";
 
 async function main() {
-  let cont = true;
-
-  while (cont) {
-    const command = await select({
-      message: "Select an action",
-      choices: [
-        { name: "Purchase", value: "purchase" },
-        { name: "Transfer", value: "transfer" },
-        { name: "Mortgage Interest Update", value: "mortgage" },
-        { name: "New Expense Account", value: "newExpense" },
-        { name: "Quit", value: "quit" },
-      ] as const,
-    });
-    const accounts = Account.find();
-
-    switch (command) {
-      case "quit":
-        cont = false;
-        break;
-      default:
-        await handlers[command](accounts);
-    }
-  }
+  const templates = Template.find();
+  console.log(templates);
 }
 
 main().catch((error) => {
