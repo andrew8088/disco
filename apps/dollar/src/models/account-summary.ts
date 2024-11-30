@@ -1,6 +1,7 @@
 import * as z from "@disco/parz";
 import { getDb, Id } from "../database";
 import * as Account from "./account";
+import { currency } from "../utils";
 
 export type AccountSummary = Account.Account & {
   transactions: Array<SummaryRow>;
@@ -19,7 +20,7 @@ type SummaryRow = z.Infer<typeof summaryRowParser>;
 export function find(accountId: Id): AccountSummary {
   const account = Account.findOne(accountId);
   const transactions = findTransactions(accountId);
-  const balance = transactions[transactions.length - 1].total;
+  const balance = transactions[transactions.length - 1]?.total ?? "0.00";
 
   return {
     ...account,
@@ -51,17 +52,13 @@ export function render(summary: AccountSummary) {
   const trxOutput = transactions
     .map(
       (t) =>
-        `${t.date.split("T")[0]} | ${dollarCol((t.amount / 100).toFixed(2))} | ${t.description}`,
+        `${t.date.split("T")[0]} | ${currency((t.amount / 100).toFixed(2))} | ${t.description}`,
     )
     .join("\n");
 
   return `${trxOutput}
-${"".padStart(12)} ${dollarCol(balance)}
+${"".padStart(12)} ${currency(balance)}
 
 💳 ${name} - ${description} (${type}, #${id})
   `;
-}
-
-function dollarCol(val: string) {
-  return val.replace(/^(-)?/, "$1$").padStart(9);
 }

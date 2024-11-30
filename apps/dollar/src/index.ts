@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { command as all } from "./commands/all";
 import { command as add } from "./commands/add";
 import { command as summary } from "./commands/summary";
 import { handleExitPrompt } from "./utils";
@@ -13,6 +14,11 @@ program
   .command("add")
   .description("Add a new transaction")
   .action(() => add().catch(handleExitPrompt));
+
+program
+  .command("all")
+  .description("View a summary of all transactions")
+  .action(() => all().catch(handleExitPrompt));
 
 program
   .command("summary")

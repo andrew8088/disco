@@ -12,3 +12,7 @@ export async function handleExitPrompt(error: unknown) {
     throw error;
   }
 }
+
+export function currency(val: string, pad = 11) {
+  return val.replace(/^(-)?/, "$1$").padStart(pad);
+}
