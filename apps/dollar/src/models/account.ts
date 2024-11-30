@@ -1,5 +1,5 @@
 import * as z from "@disco/parz";
-import { getDb } from "../database";
+import { getDb, Id } from "../database";
 
 const accountTypeParser = z.or([
   z.literal("asset"),
@@ -22,6 +22,13 @@ export type AccountType = z.Infer<typeof accountTypeParser>;
 export function find() {
   const raw = getDb().prepare("SELECT id, name, type, description FROM accounts").all();
   return z.array(accountParser).parse(raw);
+}
+
+export function findOne(id: Id) {
+  const raw = getDb()
+    .prepare("SELECT id, name, type, description FROM accounts WHERE id = ?")
+    .get(id);
+  return accountParser.parse(raw);
 }
 
 export function create(name: string, description: string, type: AccountType) {
