@@ -42,6 +42,26 @@ JOIN main.journal_entries je on transactions.journal_entry_id = je.id
 WHERE account_id = ?
 ORDER BY date;`,
     )
-    .get(accountId);
+    .all(accountId);
   return z.array(summaryRowParser).parse(raw).sort();
+}
+
+export function render(summary: AccountSummary) {
+  const { id, name, description, balance, transactions, type } = summary;
+  const trxOutput = transactions
+    .map(
+      (t) =>
+        `${t.date.split("T")[0]} | ${dollarCol((t.amount / 100).toFixed(2))} | ${t.description}`,
+    )
+    .join("\n");
+
+  return `${trxOutput}
+${"".padStart(12)} ${dollarCol(balance)}
+
+💳 ${name} - ${description} (${type}, #${id})
+  `;
+}
+
+function dollarCol(val: string) {
+  return val.replace(/^(-)?/, "$1$").padStart(9);
 }

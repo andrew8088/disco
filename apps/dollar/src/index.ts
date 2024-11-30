@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { command as add } from "./commands/add";
+import { command as summary } from "./commands/summary";
 import { handleExitPrompt } from "./utils";
 
 const program = new Command();
@@ -12,5 +13,10 @@ program
   .command("add")
   .description("Add a new transaction")
   .action(() => add().catch(handleExitPrompt));
+
+program
+  .command("summary")
+  .description("View a summary of an account")
+  .action(() => summary().catch(handleExitPrompt));
 
 program.parse();
