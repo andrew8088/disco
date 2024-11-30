@@ -1,6 +1,15 @@
 import { setTimeout, setImmediate } from "node:timers/promises";
 import { it, expect, describe } from "vitest";
-import { createErrorClass, deferred, pipe, pipeAsync, forAwait, waitUntilCountSync } from "./index";
+import { getExceptionSync } from "@disco/test-utils";
+import {
+  createErrorClass,
+  deferred,
+  pipe,
+  pipeAsync,
+  forAwait,
+  waitUntilCountSync,
+  mustFind,
+} from "./index";
 
 describe("deferred", () => {
   it("resolves the promise", () => {
@@ -126,5 +135,16 @@ describe("waitUntilCountSync", () => {
     const arr = [1, 2, 3, 4, 5, 6];
     await waitUntilCountSync(arr, 5);
     expect(arr.length).toBe(6);
+  });
+});
+
+describe("mustFind", () => {
+  it("works", () => {
+    const arr = [1, 2, 3, 4, 5];
+    expect(mustFind(arr, (n) => n === 3)).toBe(3);
+  });
+  it("throws", () => {
+    const arr = [1, 2, 3, 4, 5];
+    expect(getExceptionSync(() => mustFind(arr, (n) => n === 6)).type).toBe("NotFoundError");
   });
 });

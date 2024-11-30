@@ -91,3 +91,11 @@ export async function waitUntilCountSync<T>(iter: Iterable<T>, count: number) {
     arr = [...iter];
   }
 }
+
+const NotFoundError = createErrorClass<undefined>("NotFoundError")[0];
+
+export function mustFind<T>(arr: T[], fn: (t: T) => boolean) {
+  const item = arr.find(fn);
+  if (!item) throw new NotFoundError("not found", undefined);
+  return item;
+}
