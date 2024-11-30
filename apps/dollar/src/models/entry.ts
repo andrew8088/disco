@@ -4,6 +4,7 @@ import { select, input } from "@inquirer/prompts";
 import { parseAmount } from "../utils";
 import * as Account from "./account";
 import { calendar } from "../inquirer-calendar";
+import { mustFind } from "@disco/common";
 
 export function create(entry: Entry) {
   const journalEntryId = createJournalEntry(entry.date, entry.description);
@@ -57,7 +58,7 @@ export async function complete(entry: PartialWith<Entry, undefined | null>): Pro
     });
     fromAccountId = fromAccount.id;
   } else {
-    const fromAccount = accounts.find((a) => a.id === fromAccountId);
+    const fromAccount = mustFind(accounts, (a) => a.id === fromAccountId);
     console.log(`❯ cached from account: ${fromAccount.name}`);
   }
 
@@ -68,7 +69,7 @@ export async function complete(entry: PartialWith<Entry, undefined | null>): Pro
     });
     toAccountId = toAccount.id;
   } else {
-    const toAccount = accounts.find((a) => a.id === toAccountId);
+    const toAccount = mustFind(accounts, (a) => a.id === toAccountId);
     console.log(`❯ cached to account: ${toAccount.name}`);
   }
 
