@@ -1,5 +1,5 @@
-import * as Template from "./template";
-import * as Entry from "./entry";
+import * as Template from "./models/template";
+import * as Entry from "./models/entry";
 import { select } from "@inquirer/prompts";
 import { Command } from "commander";
 

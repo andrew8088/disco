@@ -1,9 +1,9 @@
 import * as z from "@disco/parz";
-import { getDb, Id } from "./database";
+import { getDb, Id } from "../database";
 import { select, input } from "@inquirer/prompts";
-import { parseAmount } from "./utils";
+import { parseAmount } from "../utils";
 import * as Account from "./account";
-import { calendar } from "./inquirer-calendar";
+import { calendar } from "../inquirer-calendar";
 
 export function create(entry: Entry) {
   const journalEntryId = createJournalEntry(entry.date, entry.description);

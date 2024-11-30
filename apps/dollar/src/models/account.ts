@@ -1,5 +1,5 @@
 import * as z from "@disco/parz";
-import { getDb } from "./database";
+import { getDb } from "../database";
 
 const accountTypeParser = z.or([
   z.literal("asset"),
