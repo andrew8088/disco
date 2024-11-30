@@ -41,7 +41,11 @@ const entryParser = z.object({
 
 type Entry = z.Infer<typeof entryParser>;
 
-export async function complete(entry: Partial<Entry>): Promise<Entry> {
+type PartialWith<T, N> = {
+  [P in keyof T]?: T[P] | N;
+};
+
+export async function complete(entry: PartialWith<Entry, undefined | null>): Promise<Entry> {
   let { fromAccountId, toAccountId, date, description, amount } = entry;
 
   const accounts = Account.find();
