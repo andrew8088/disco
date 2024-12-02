@@ -13,6 +13,9 @@ export async function handleExitPrompt(error: unknown) {
   }
 }
 
-export function currency(val: string, pad = 11) {
-  return val.replace(/^(-)?/, "$1$").padStart(pad);
+export function currency(val: string, pad = 12) {
+  return val
+    .replace(/^(-)?/, "$1$")
+    .replace(/(\d)(\d\d\d\.)/, "$1,$2")
+    .padStart(pad);
 }
