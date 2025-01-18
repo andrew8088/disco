@@ -50,7 +50,7 @@ export function expenses(accounts: Account[]) {
 
 export function toChoices(accounts: Array<Account>) {
   return accounts.map((account) => ({
-    name: account.name,
+    name: `${account.name} (${account.id})`,
     value: account,
     description: account.description,
   }));
