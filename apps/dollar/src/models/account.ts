@@ -55,7 +55,3 @@ export function toChoices(accounts: Array<Account>) {
     description: account.description || "",
   }));
 }
-
-export function select(selector: (arr: Array<Account>) => Promise<Account>) {
-  return selector(find());
-}
