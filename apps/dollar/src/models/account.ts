@@ -13,7 +13,7 @@ const accountParser = z.object({
   id: z.number(),
   name: z.string(),
   type: accountTypeParser,
-  description: z.string(),
+  description: z.or([z.string(), z.literal(null)]),
 });
 
 export type Account = z.Infer<typeof accountParser>;
@@ -52,7 +52,7 @@ export function toChoices(accounts: Array<Account>) {
   return accounts.map((account) => ({
     name: `${account.name} (${account.id})`,
     value: account,
-    description: account.description,
+    description: account.description || "",
   }));
 }
 
