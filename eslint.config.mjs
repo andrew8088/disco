@@ -19,6 +19,7 @@ export default [
   {
     ignores: [
       "packages/**/dist/*",
+      "apps/**/dist/*",
       "packages/**/scratch/*",
       "pnpm-lock.yaml",
       "pnpm-workspace.yaml",
