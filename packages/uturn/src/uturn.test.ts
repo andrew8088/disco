@@ -145,7 +145,9 @@ describe("uturn", () => {
     const app = uturn<http.IncomingMessage, http.ServerResponse>()
       .use(parseUrl)
       .use(parseMethodAndBody)
-      .use(() => {});
+      .use(() => {
+        "empty";
+      });
 
     server.on("request", handleErrors(app));
     const res = await client.get("/");

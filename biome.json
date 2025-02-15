@@ -103,6 +103,7 @@
       }
     },
     "ignore": [
+      "./**/*.vue",
       "packages/**/dist/*",
       "apps/**/dist/*",
       "packages/**/scratch/*",

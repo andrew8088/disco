@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "pnpm biome lint --write --error-on-warnings .",
     "format": "prettier --write .",
     "test": "vitest",
     "test:all": "pnpm --filter \"./packages/*\" test",
@@ -38,7 +38,7 @@
   },
   "lint-staged": {
     "**/*.{js,ts,tsx}": [
-      "eslint --fix"
+      "pnpm lint"
     ],
     "**/*": "prettier --write --ignore-unknown --no-error-on-unmatched-pattern"
   }

@@ -108,7 +108,9 @@ describe("forAwait", () => {
     };
 
     let sum = 0;
-    await forAwait(range, (value) => (sum += value));
+    await forAwait(range, (value) => {
+      sum += value;
+    });
     await setTimeout(10); // ugh...
     expect(sum).toBe(15);
   });

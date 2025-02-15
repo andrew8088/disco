@@ -18,13 +18,11 @@ export function parseUrlToParams<Path extends string>(
   return m.params as PathParams<Path>;
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types */
 export type PathParams<
   T extends string,
-  Acc extends Record<string, string> = {},
-> = T extends `${infer _}/:${infer param}/${infer rest}`
+  Acc extends Record<string, string> = Record<string, string>,
+> = T extends `${string}/:${infer param}/${infer rest}`
   ? PathParams<rest, Acc & { [key in param]: string }>
-  : T extends `${infer _}/:${infer param}`
+  : T extends `${string}/:${infer param}`
     ? Acc & { [key in param]: string }
     : Acc;
-/* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types */
