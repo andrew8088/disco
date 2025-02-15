@@ -27,7 +27,8 @@
     "better-sqlite3": "^9.6.0",
     "commander": "^12.1.0",
     "date-fns": "^4.1.0",
-    "unbuild": "^2.0.0"
+    "unbuild": "^2.0.0",
+    "vitest": "^3.0.2"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11"

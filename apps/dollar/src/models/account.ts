@@ -19,7 +19,7 @@ const accountParser = z.object({
 export type Account = z.Infer<typeof accountParser>;
 export type AccountType = z.Infer<typeof accountTypeParser>;
 
-export function find() {
+export function find(): Account[] {
   const raw = getDb().prepare("SELECT id, name, type, description FROM accounts").all();
   return z.array(accountParser).parse(raw);
 }
