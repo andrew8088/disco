@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "test": "pnpm build && node ./dist/index.mjs"
+    "test": "NODE_ENV=test DOLLAR_PATH=$(mktemp) vitest",
+    "run": "pnpm build && node ./dist/index.mjs"
   },
   "keywords": [],
   "author": "",
