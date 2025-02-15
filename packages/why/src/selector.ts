@@ -1,10 +1,15 @@
 import * as z from "@disco/parz";
 
-type ParzKeys<T extends z.ParzObject<Record<string, z.Parz<unknown>>>> =
-  T extends z.ParzObject<infer R> ? keyof R : never;
+type ParzKeys<T extends z.ParzObject<Record<string, z.Parz<unknown>>>> = T extends z.ParzObject<
+  infer R
+>
+  ? keyof R
+  : never;
 
-type ParzValues<T extends z.ParzObject<Record<string, z.Parz<unknown>>>, K extends ParzKeys<T>> =
-  T extends z.ParzObject<infer R> ? R[K] : never;
+type ParzValues<
+  T extends z.ParzObject<Record<string, z.Parz<unknown>>>,
+  K extends ParzKeys<T>,
+> = T extends z.ParzObject<infer R> ? R[K] : never;
 
 type Selectable<
   A extends string | number | symbol,

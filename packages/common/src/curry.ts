@@ -16,12 +16,11 @@ type Remaining<A extends unknown[], B extends unknown[]> = B extends [...A, ...i
 
 type ParamSlices<Fn extends AnyFn> = TupleSlices<Parameters<Fn>>;
 
-type Curry<Fn extends AnyFn, Args extends unknown[] = Parameters<Fn>> =
-  First<Args> extends never
-    ? () => ReturnType<Fn>
-    : Rest<Args>["length"] extends 0
-      ? (arg: First<Args>) => ReturnType<Fn>
-      : (arg: First<Args>) => Curry<Fn, Rest<Args>>;
+type Curry<Fn extends AnyFn, Args extends unknown[] = Parameters<Fn>> = First<Args> extends never
+  ? () => ReturnType<Fn>
+  : Rest<Args>["length"] extends 0
+    ? (arg: First<Args>) => ReturnType<Fn>
+    : (arg: First<Args>) => Curry<Fn, Rest<Args>>;
 
 export function curry<Fn extends AnyFn, InitialArgs extends TupleSlices<Parameters<Fn>>>(
   fn: Fn,
@@ -59,10 +58,12 @@ type CurriedFunction<InitialArgs extends unknown[], FN extends AnyFn> = <
   ...args: NextArgs
 ) => CurriedFunctionOrReturnValue<[...InitialArgs, ...NextArgs], FN>;
 
-type CurriedFunctionOrReturnValue<InitialArgs extends unknown[], Fn extends AnyFn> =
-  Remaining<InitialArgs, Parameters<Fn>> extends [unknown, ...unknown[]]
-    ? CurriedFunction<InitialArgs, Fn>
-    : ReturnType<Fn>;
+type CurriedFunctionOrReturnValue<InitialArgs extends unknown[], Fn extends AnyFn> = Remaining<
+  InitialArgs,
+  Parameters<Fn>
+> extends [unknown, ...unknown[]]
+  ? CurriedFunction<InitialArgs, Fn>
+  : ReturnType<Fn>;
 
 export function curry2<Fn extends AnyFn, InitialArgs extends ParamSlices<Fn>>(
   fn: Fn,
