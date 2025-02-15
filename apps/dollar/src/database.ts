@@ -4,15 +4,11 @@ let _db: Database.Database | null = null;
 
 export function getDb() {
   if (!_db) {
-    const { DOLLAR_PATH, NODE_ENV } = process.env;
+    const { DOLLAR_PATH } = process.env;
     if (!DOLLAR_PATH) {
       throw new Error("DOLLAR_PATH is not set");
     }
     _db = new Database(DOLLAR_PATH);
-
-    if (NODE_ENV === "test") {
-      _setup(_db);
-    }
   }
 
   return _db;
@@ -20,9 +16,9 @@ export function getDb() {
 
 export type Id = number | bigint;
 
-function _setup(db: Database.Database) {
+export function _setup(db: Database.Database) {
   db.exec(`
-create table if not exists main.journal_entries
+create table if not exists journal_entries
 (
     id          INTEGER primary key autoincrement,
     date        TEXT default (datetime('now')) not null,
@@ -30,4 +26,43 @@ create table if not exists main.journal_entries
     notes       TEXT
 );
       `);
+  db.exec(`
+create table if not exists accounts
+(
+    id          INTEGER primary key autoincrement,
+    name        TEXT not null unique,
+    type        text not null,
+    description TEXT
+);
+`);
+
+  db.exec(`
+create table if not exists transactions
+(
+    id               INTEGER primary key autoincrement,
+    journal_entry_id INTEGER not null references journal_entries(id),
+    account_id       INTEGER not null references accounts(id),
+    amount           REAL    not null
+);
+  `);
+
+  db.exec(`
+create table if not exists templates
+(
+    name          TEXT    not null,
+    fromAccountId INTEGER,
+    toAccountId   INTEGER,
+    date          TEXT,
+    description   TEXT,
+    amount        REAL,
+    id            integer not null
+);
+  `);
+}
+
+export function _reset(db: Database.Database) {
+  db.exec(`delete from transactions`);
+  db.exec(`delete from journal_entries;`);
+  db.exec(`delete from accounts;`);
+  db.exec(`delete from templates`);
 }
