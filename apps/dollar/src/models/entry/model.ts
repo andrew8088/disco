@@ -28,7 +28,7 @@ type JournalEntry = {
   };
 };
 
-export function create(data: CreateEntryData) {
+export function create(data: CreateEntryData): JournalEntry {
   const journalEntryId = EntryQuery.insert({
     description: data.description,
     date: data.date,
@@ -47,9 +47,26 @@ export function create(data: CreateEntryData) {
   });
 
   const entry = EntryQuery.findById(journalEntryId);
-  const transactions = TransactionQuery.findByEntryId(journalEntryId);
-  const fromAccount = AccountQuery.findById(data.fromAccountId);
-  const toAccount = AccountQuery.findById(data.toAccountId);
+  return hydrateAndRender(entry);
+}
+
+export function findByAccountId(accountId: Id): JournalEntry[] {
+  return TransactionQuery.findByAccountId(accountId)
+    .map((t) => {
+      const entry = EntryQuery.findById(t.journal_entry_id);
+      return hydrateAndRender(entry);
+    })
+    .toSorted((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+function hydrateAndRender(entry: EntryQuery.EntryObject): JournalEntry {
+  const transactions = TransactionQuery.findByEntryId(entry.id);
+
+  const fromAccountId = mustFind(transactions, (t) => t.amount < 0).account_id;
+  const toAccountId = mustFind(transactions, (t) => t.amount > 0).account_id;
+
+  const fromAccount = AccountQuery.findById(fromAccountId);
+  const toAccount = AccountQuery.findById(toAccountId);
 
   return render(entry, transactions, fromAccount, toAccount);
 }

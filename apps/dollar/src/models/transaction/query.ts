@@ -29,3 +29,9 @@ export function findByEntryId(entryId: Id): TransactionObject[] {
   const result = getDb().prepare(trxStmt).all([entryId]);
   return result.map((row) => transactionRowParser.parse(row));
 }
+
+export function findByAccountId(accountId: Id): TransactionObject[] {
+  const trxStmt = `SELECT * FROM transactions WHERE account_id = ?`;
+  const result = getDb().prepare(trxStmt).all([accountId]);
+  return result.map((row) => transactionRowParser.parse(row));
+}

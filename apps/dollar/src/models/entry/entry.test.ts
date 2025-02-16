@@ -19,6 +19,43 @@ describe("EntryQuery", () => {
       notes: null,
     });
   });
+
+  it("findByAccountId", () => {
+    const fromAccountId = AccountQuery.insert({
+      name: "from",
+      description: "from",
+      type: "asset",
+    });
+    const toAccountId = AccountQuery.insert({
+      name: "to",
+      description: "to",
+      type: "liability",
+    });
+
+    const date = new Date();
+    for (let i = 1; i <= 10; i++) {
+      date.setDate(date.getDate() + i);
+      EntryModel.create({
+        date,
+        description: "entry",
+        amount: i,
+        fromAccountId,
+        toAccountId,
+      });
+    }
+
+    const fromEntries = EntryModel.findByAccountId(fromAccountId);
+    const toEntries = EntryModel.findByAccountId(toAccountId);
+
+    expect(fromEntries).toHaveLength(10);
+    expect(toEntries).toHaveLength(10);
+
+    for (let i = 0; i < fromEntries.length - 1; i++) {
+      expect(fromEntries[i].date.valueOf()).toBeLessThan(fromEntries[i + 1].date.valueOf());
+
+      expect(toEntries[i].date.valueOf()).toBeLessThan(toEntries[i + 1].date.valueOf());
+    }
+  });
 });
 
 describe("EntryModel", () => {

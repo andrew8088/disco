@@ -1,5 +1,5 @@
 import * as z from "@disco/parz";
-import { Id, getDb } from "../../database";
+import { Id, getDb, idParser } from "../../database";
 
 type EntryInsert = {
   description: string;
@@ -16,7 +16,7 @@ export function insert(data: EntryInsert) {
 }
 
 const entryRowParser = z.object({
-  id: z.or([z.number(), z.bigint()]),
+  id: idParser,
   date: z.string(), // TODO write z.isoStrToDate()
   description: z.string(),
   notes: z.or([z.string(), z.literal(null)]),
@@ -28,4 +28,10 @@ export function findById(id: Id): EntryObject {
   const entryStmt = getDb().prepare("SELECT * FROM journal_entries WHERE id = ?");
   const result = entryStmt.get(id);
   return entryRowParser.parse(result);
+}
+
+export function findByIds(ids: Id[]): EntryObject[] {
+  const result = getDb().prepare("SELECT * FROM journal_entries WHERE id in (?)").all(ids);
+
+  return result.map((r) => entryRowParser.parse(r));
 }

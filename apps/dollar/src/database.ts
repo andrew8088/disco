@@ -1,3 +1,4 @@
+import * as z from "@disco/parz";
 import Database from "better-sqlite3";
 
 let _db: Database.Database | null = null;
@@ -15,6 +16,8 @@ export function getDb() {
 }
 
 export type Id = number | bigint;
+
+export const idParser = z.or([z.number(), z.bigint()]);
 
 export function _setup(db: Database.Database) {
   db.exec(`
