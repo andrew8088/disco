@@ -97,4 +97,37 @@ describe("EntryModel", () => {
       },
     });
   });
+
+  it("completes", async () => {
+    const fromAccountId = AccountQuery.insert({
+      name: "from",
+      description: "from",
+      type: "asset",
+    });
+
+    const toAccountId = AccountQuery.insert({
+      name: "to",
+      description: "to",
+      type: "liability",
+    });
+    const date = new Date();
+    const entry = await EntryModel.complete(
+      {},
+      {
+        getDate: () => date,
+        getDescription: () => "test",
+        getAmount: () => 10,
+        getFromAccountId: () => fromAccountId,
+        getToAccountId: () => toAccountId,
+      },
+    );
+
+    expect(entry).toEqual({
+      date,
+      description: "test",
+      amount: 10,
+      fromAccountId,
+      toAccountId,
+    });
+  });
 });

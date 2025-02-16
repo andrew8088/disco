@@ -1,5 +1,5 @@
 import { mustFind } from "@disco/common";
-import { Id } from "../../database";
+import { Id, idParser } from "../../database";
 import * as AccountQuery from "../account/query";
 import * as TransactionQuery from "../transaction/query";
 import * as EntryQuery from "./query";
@@ -57,6 +57,38 @@ export function findByAccountId(accountId: Id): JournalEntry[] {
       return hydrateAndRender(entry);
     })
     .toSorted((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+type UserForm<T> = {
+  [K in keyof T as `get${Capitalize<K & string>}`]: () => T[K] | Promise<T[K]>;
+};
+
+export async function complete(
+  partialEntry: Partial<CreateEntryData>,
+  form: UserForm<CreateEntryData>,
+): Promise<CreateEntryData> {
+  let { fromAccountId, toAccountId, date, description, amount } = partialEntry;
+
+  if (!fromAccountId) {
+    fromAccountId = await form.getFromAccountId();
+  }
+
+  if (!toAccountId) {
+    toAccountId = await form.getToAccountId();
+  }
+
+  if (!date) {
+    date = await form.getDate();
+  }
+  if (!description) {
+    description = await form.getDescription();
+  }
+
+  if (!amount) {
+    amount = await form.getAmount();
+  }
+
+  return { fromAccountId, toAccountId, date, description, amount };
 }
 
 function hydrateAndRender(entry: EntryQuery.EntryObject): JournalEntry {
