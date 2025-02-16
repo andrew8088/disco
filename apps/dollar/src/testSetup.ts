@@ -7,4 +7,5 @@ beforeAll(() => {
 
 afterEach(() => {
   _reset(getDb());
+  _setup(getDb());
 });

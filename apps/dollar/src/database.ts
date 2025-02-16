@@ -61,8 +61,8 @@ create table if not exists templates
 }
 
 export function _reset(db: Database.Database) {
-  db.exec(`delete from transactions`);
-  db.exec(`delete from journal_entries;`);
-  db.exec(`delete from accounts;`);
-  db.exec(`delete from templates`);
+  db.exec(`drop table transactions`);
+  db.exec(`drop table journal_entries;`);
+  db.exec(`drop table accounts;`);
+  db.exec(`drop table templates`);
 }

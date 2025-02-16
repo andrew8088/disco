@@ -11,13 +11,13 @@ export function create(entry: BasicEntry) {
   createTransactions(journalEntryId, entry.amount, entry.fromAccountId, entry.toAccountId);
 }
 
-export function createJournalEntry(date: Date, description: string) {
+function createJournalEntry(date: Date, description: string) {
   const stmt = getDb().prepare("INSERT INTO journal_entries (date, description) VALUES (?, ?)");
   const result = stmt.run(date.toISOString(), description);
   return result.lastInsertRowid;
 }
 
-export function createTransactions(
+function createTransactions(
   journalEntryId: Id,
   amount: number,
   fromAccountId: Id,
@@ -29,7 +29,10 @@ export function createTransactions(
 
   const fromTrxId = stmt.run(journalEntryId, fromAccountId, -1 * amount);
   const toTrxId = stmt.run(journalEntryId, toAccountId, amount);
-  return { fromTrxId: fromTrxId.lastInsertRowid, toTrxId: toTrxId.lastInsertRowid };
+  return {
+    fromTrxId: fromTrxId.lastInsertRowid,
+    toTrxId: toTrxId.lastInsertRowid,
+  };
 }
 
 const basicEntryParser = z.object({
@@ -146,7 +149,13 @@ export function find(accountId?: Id): Array<FullEntry> {
       description: _3,
       ...toAccount
     } = mustFind(entries, (e) => e.amount > 0);
-    return { journal_entry_id, date: new Date(date), description, fromAccount, toAccount };
+    return {
+      journal_entry_id,
+      date: new Date(date),
+      description,
+      fromAccount,
+      toAccount,
+    };
   });
 }
 

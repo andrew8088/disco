@@ -22,7 +22,9 @@ const entryRowParser = z.object({
   notes: z.or([z.string(), z.literal(null)]),
 });
 
-export function findById(id: Id) {
+export type EntryObject = z.Infer<typeof entryRowParser>;
+
+export function findById(id: Id): EntryObject {
   const entryStmt = getDb().prepare("SELECT * FROM journal_entries WHERE id = ?");
   const result = entryStmt.get(id);
   return entryRowParser.parse(result);

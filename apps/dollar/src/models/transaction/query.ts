@@ -22,7 +22,9 @@ const transactionRowParser = z.object({
   amount: z.number(),
 });
 
-export function findByEntryId(entryId: Id) {
+export type TransactionObject = z.Infer<typeof transactionRowParser>;
+
+export function findByEntryId(entryId: Id): TransactionObject[] {
   const trxStmt = `SELECT * FROM transactions WHERE journal_entry_id = ?`;
   const result = getDb().prepare(trxStmt).all([entryId]);
   return result.map((row) => transactionRowParser.parse(row));

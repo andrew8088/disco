@@ -28,7 +28,9 @@ const accountParser = z.object({
   description: z.or([z.string(), z.literal(null)]),
 });
 
-export function findById(id: Id) {
+export type AccountObject = z.Infer<typeof accountParser>;
+
+export function findById(id: Id): AccountObject {
   const raw = getDb()
     .prepare("SELECT id, name, type, description FROM accounts WHERE id = ?")
     .get(id);
