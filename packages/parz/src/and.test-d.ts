@@ -1,8 +1,8 @@
-import { it, expectTypeOf } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
+import and from "./and";
 import object from "./object";
 import string from "./string";
-import and from "./and";
 
 it("returns intersection types", () => {
   const hasNameSchema = object({ name: string() });

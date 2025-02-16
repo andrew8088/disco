@@ -1,4 +1,4 @@
-import { it, expectTypeOf } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
 import literal from "./literal";
 

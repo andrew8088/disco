@@ -1,4 +1,4 @@
-import { assert, it, describe, expect } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import { Http, HttpResponseError } from "./errors";
 
 describe("errors", () => {

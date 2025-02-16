@@ -1,11 +1,11 @@
-import { it, expectTypeOf } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
-import object from "./object";
-import string from "./string";
-import number from "./number";
+import { Parz } from ".";
 import boolean from "./boolean";
 import literal from "./literal";
-import { Parz } from ".";
+import number from "./number";
+import object from "./object";
+import string from "./string";
 
 const schema = object({
   age: number(),

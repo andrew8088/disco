@@ -1,5 +1,5 @@
-import { getDb, Id } from "../../database";
 import * as z from "@disco/parz";
+import { Id, getDb } from "../../database";
 
 type TransactionInsert = {
   journalEntryId: Id;

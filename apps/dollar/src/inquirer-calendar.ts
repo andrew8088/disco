@@ -1,13 +1,13 @@
 import {
+  KeypressEvent,
   createPrompt,
-  useState,
-  useKeypress,
+  isDownKey,
   isEnterKey,
   isUpKey,
-  isDownKey,
-  KeypressEvent,
   makeTheme,
+  useKeypress,
   usePrefix,
+  useState,
 } from "@inquirer/core";
 import { add, format } from "date-fns";
 

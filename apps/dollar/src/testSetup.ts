@@ -1,5 +1,5 @@
-import { beforeAll, afterEach } from "vitest";
-import { getDb, _setup, _reset } from "./database";
+import { afterEach, beforeAll } from "vitest";
+import { _reset, _setup, getDb } from "./database";
 
 beforeAll(() => {
   _setup(getDb());

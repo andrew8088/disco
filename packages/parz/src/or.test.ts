@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
 import { getExceptionSync } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
 
-import string from "./string";
 import number from "./number";
 import or from "./or";
+import string from "./string";
 
 describe("or", () => {
   const schema = or([string(), number()]);

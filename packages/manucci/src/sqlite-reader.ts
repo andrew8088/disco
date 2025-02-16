@@ -1,5 +1,5 @@
-import Sqlite from "better-sqlite3";
 import { createErrorClass } from "@disco/common";
+import Sqlite from "better-sqlite3";
 
 const [SqliteReaderError] = createErrorClass<{ query: string }>("SqliteReaderError");
 const [NotFoundError] = createErrorClass("NotFoundError", SqliteReaderError);

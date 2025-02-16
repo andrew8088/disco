@@ -1,9 +1,9 @@
-import { it, expectTypeOf, describe } from "vitest";
+import { describe, expectTypeOf, it } from "vitest";
 
 import array from "./array";
 import number from "./number";
-import string from "./string";
 import or from "./or";
+import string from "./string";
 
 const schema = array(number());
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import * as TransactionQuery from "./query";
 import * as AccountQuery from "../account/query";
 import * as EntryQuery from "../entry/query";
+import * as TransactionQuery from "./query";
 
 describe("TransactionQuery", () => {
   it("inserts and finds", async () => {

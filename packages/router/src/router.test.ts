@@ -1,6 +1,6 @@
-import { expect, it, describe } from "vitest";
-import createRouter from "./router";
 import { getClientAndServer, getException } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
+import createRouter from "./router";
 
 describe("router", () => {
   it("responds", async () => {

@@ -1,5 +1,5 @@
 import { Parz } from "./types";
-import { SchemaError, type UnionToIntersection, type FlatType, handleError } from "./utils";
+import { type FlatType, SchemaError, type UnionToIntersection, handleError } from "./utils";
 
 export default function and<D extends Array<Parz<T>>, T>(parsers: D) {
   return {

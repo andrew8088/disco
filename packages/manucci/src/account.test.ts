@@ -1,10 +1,10 @@
 import { rmSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
-import { describe, expect, it, beforeEach } from "vitest";
-import * as Account from "./account";
-import Database, * as Sqlite from "better-sqlite3";
 import { getException } from "@disco/test-utils";
+import Database, * as Sqlite from "better-sqlite3";
+import { beforeEach, describe, expect, it } from "vitest";
+import * as Account from "./account";
 
 describe("account", () => {
   let db: Sqlite.Database;

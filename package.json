@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "pnpm biome lint --write --error-on-warnings .",
-    "format": "pnpm biome format --write .",
+    "lint": "pnpm biome check --write --error-on-warnings .",
     "test": "vitest",
     "test:all": "pnpm --filter \"./packages/*\" test",
     "prepare": "husky",
@@ -28,7 +27,6 @@
     "lint-staged": "^15.2.7"
   },
   "lint-staged": {
-    "**/*.{js,ts,tsx}": ["pnpm lint"],
-    "**/*": "pnpm format"
+    "**/*": "pnpm biome check"
   }
 }

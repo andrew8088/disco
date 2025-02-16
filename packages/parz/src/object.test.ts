@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
 import { getExceptionSync } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
 
-import object from "./object";
-import string from "./string";
-import number from "./number";
 import boolean from "./boolean";
 import literal from "./literal";
+import number from "./number";
+import object from "./object";
+import string from "./string";
 
 describe("object", () => {
   const schema = object({

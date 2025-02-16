@@ -1,8 +1,8 @@
 import { Command } from "commander";
-import { command as all } from "./commands/all";
 import { command as add } from "./commands/add";
-import { command as summary } from "./commands/summary";
+import { command as all } from "./commands/all";
 import { command as review } from "./commands/review";
+import { command as summary } from "./commands/summary";
 import { handleExitPrompt } from "./utils";
 
 const program = new Command();

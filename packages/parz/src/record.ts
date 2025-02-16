@@ -1,7 +1,7 @@
 import { simpleFaker as faker } from "@faker-js/faker";
-import { SchemaError, handleError } from "./utils";
 import object from "./object";
 import { Parz } from "./types";
+import { SchemaError, handleError } from "./utils";
 
 export default function record<K extends string | number, V>(
   key: Parz<K>,

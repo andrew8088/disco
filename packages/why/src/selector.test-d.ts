@@ -1,5 +1,5 @@
 import * as z from "@disco/parz";
-import { describe, it, expectTypeOf } from "vitest";
+import { describe, expectTypeOf, it } from "vitest";
 import Selector from "./selector";
 
 const user = z.object({

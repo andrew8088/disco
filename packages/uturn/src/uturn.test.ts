@@ -1,9 +1,9 @@
 import http from "http";
-import { getClientAndServer, type TestHTTPClient } from "@disco/test-utils";
-import { expect, it, describe, beforeEach, afterEach } from "vitest";
-import { uturn } from "./uturn";
-import { parseMethodAndBody, parseUrl, handleErrors } from "./middleware";
+import { type TestHTTPClient, getClientAndServer } from "@disco/test-utils";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { R } from "./errors";
+import { handleErrors, parseMethodAndBody, parseUrl } from "./middleware";
+import { uturn } from "./uturn";
 
 describe("uturn", () => {
   let server: http.Server;

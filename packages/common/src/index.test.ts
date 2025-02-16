@@ -1,14 +1,14 @@
-import { setTimeout, setImmediate } from "node:timers/promises";
-import { it, expect, describe } from "vitest";
+import { setImmediate, setTimeout } from "node:timers/promises";
 import { getExceptionSync } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
 import {
   createErrorClass,
   deferred,
+  forAwait,
+  mustFind,
   pipe,
   pipeAsync,
-  forAwait,
   waitUntilCountSync,
-  mustFind,
 } from "./index";
 
 describe("deferred", () => {

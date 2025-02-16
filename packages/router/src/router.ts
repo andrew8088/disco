@@ -1,7 +1,7 @@
-import type { Server, IncomingMessage, ServerResponse } from "http";
-import { uturn, parseUrl, parseMethodAndBody } from "@disco/uturn";
+import type { IncomingMessage, Server, ServerResponse } from "http";
 import { createErrorClass, nameFn } from "@disco/common";
-import { PathParams, parseUrlToParams, cleanPath, normalizePath } from "./path";
+import { parseMethodAndBody, parseUrl, uturn } from "@disco/uturn";
+import { PathParams, cleanPath, normalizePath, parseUrlToParams } from "./path";
 
 const [RouterError] = createErrorClass<{ existing: string; attempted: string }>("RouterError");
 

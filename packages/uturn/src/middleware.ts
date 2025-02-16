@@ -1,7 +1,7 @@
-import { deferred } from "@disco/common";
-import { UturnParseError, setErrorDetailsOnResponse } from "./errors";
 import { IncomingMessage } from "http";
 import { Writable } from "stream";
+import { deferred } from "@disco/common";
+import { UturnParseError, setErrorDetailsOnResponse } from "./errors";
 import { type Uturn } from "./uturn";
 
 export function parseUrl<Req extends IncomingMessage, Res, T>(req: Req, _res: Res, ctx: T) {

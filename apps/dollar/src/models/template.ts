@@ -1,6 +1,6 @@
+import { groupBy } from "@disco/common";
 import * as z from "@disco/parz";
 import { getDb } from "../database";
-import { groupBy } from "@disco/common";
 
 const nullable = <T>(p: z.Parz<T>) => z.or([p, z.literal(null)]);
 

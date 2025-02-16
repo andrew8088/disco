@@ -1,6 +1,6 @@
-import { it, expect, describe } from "vitest";
-import { Retry } from "./retry";
 import { getException } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
+import { Retry } from "./retry";
 
 describe("retry", () => {
   it("tries X times", async () => {

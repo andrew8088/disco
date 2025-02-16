@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { createMachine } from ".";
 import { forAwait, waitUntilCountSync } from "@disco/common";
+import { describe, expect, it } from "vitest";
+import { createMachine } from ".";
 
 function getMachine() {
   return createMachine<{

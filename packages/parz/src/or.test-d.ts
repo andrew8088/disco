@@ -1,8 +1,8 @@
-import { it, expectTypeOf } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
 import literal from "./literal";
-import string from "./string";
 import or from "./or";
+import string from "./string";
 
 it("returns union types", () => {
   const result1 = or([literal("42"), literal(false)]).parse("42");

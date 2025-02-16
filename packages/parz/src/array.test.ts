@@ -1,13 +1,13 @@
-import { describe, it, expect } from "vitest";
 import { getExceptionSync } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
 
-import or from "./or";
 import array from "./array";
-import literal from "./literal";
-import object from "./object";
-import string from "./string";
-import number from "./number";
 import boolean from "./boolean";
+import literal from "./literal";
+import number from "./number";
+import object from "./object";
+import or from "./or";
+import string from "./string";
 
 describe("array", () => {
   const schema = array(or([literal("a"), literal("b")]));

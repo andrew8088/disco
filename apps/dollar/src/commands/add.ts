@@ -1,6 +1,6 @@
-import * as Template from "../models/template";
-import * as Entry from "../models/entry";
 import { select } from "@inquirer/prompts";
+import * as Entry from "../models/entry";
+import * as Template from "../models/template";
 
 const STANDARD_TEMPLATES: Template.Template[] = [
   {

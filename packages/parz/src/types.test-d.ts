@@ -1,7 +1,7 @@
-import { it, expectTypeOf } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
-import { Infer } from "./types";
 import string from "./string";
+import { Infer } from "./types";
 
 it("infers", () => {
   const schema = string();

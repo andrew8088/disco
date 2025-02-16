@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
 import { getExceptionSync } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
 
+import and from "./and";
+import number from "./number";
 import object from "./object";
 import string from "./string";
-import number from "./number";
-import and from "./and";
 
 describe("and", () => {
   const hasNameSchema = object({ name: string() });

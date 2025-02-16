@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import * as p from ".";
 import { getExceptionSync } from "@disco/test-utils";
+import { describe, expect, it } from "vitest";
+import * as p from ".";
 
 describe("record", () => {
   const schema = p.record(p.string(), p.or([p.number(), p.boolean()]));

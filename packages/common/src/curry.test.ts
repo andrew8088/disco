@@ -1,4 +1,4 @@
-import { it, expect, describe } from "vitest";
+import { describe, expect, it } from "vitest";
 import { curry } from "./curry";
 
 function add(a: number, b: number, c: number) {

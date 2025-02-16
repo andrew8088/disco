@@ -1,5 +1,5 @@
 import * as z from "@disco/parz";
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import Selector from "./selector";
 
 const user = z.object({

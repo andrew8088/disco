@@ -1,4 +1,4 @@
-import { it, describe, expectTypeOf } from "vitest";
+import { describe, expectTypeOf, it } from "vitest";
 import createRouter from "./router";
 
 describe("router types", () => {
