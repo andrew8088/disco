@@ -2,8 +2,8 @@
   "compileOnSave": true,
   "compilerOptions": {
     "module": "ESNext",
-    "target": "es2022",
-    "lib": ["ES2022", "dom", "dom.iterable"],
+    "target": "ESNext",
+    "lib": ["ESNext", "dom", "dom.iterable"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
