@@ -35,3 +35,8 @@ export function findByAccountId(accountId: Id): TransactionObject[] {
   const result = getDb().prepare(trxStmt).all([accountId]);
   return result.map((row) => transactionRowParser.parse(row));
 }
+
+export function update(transactionId: Id, changes: { toAccountId: Id }) {
+  const stmt = getDb().prepare("UPDATE transactions SET account_id = ? WHERE id = ?");
+  return stmt.run(changes.toAccountId, transactionId);
+}

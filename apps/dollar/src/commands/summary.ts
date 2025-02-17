@@ -1,22 +1,33 @@
 import { select } from "@inquirer/prompts";
-import * as Account from "../models/account";
-import * as AccountSummary from "../models/account-summary";
-import { currency } from "../utils";
+import * as AccountQuery from "../models/account/query";
+import * as EntryModel from "../models/entry/model";
+import { $, currency, toChoices } from "../utils";
+import { renderTable } from "../views/table";
 
 export async function command() {
-  const accounts = Account.find();
+  const accounts = AccountQuery.findAll();
   const account = await select({
     message: "Select a `to` account",
-    choices: Account.toChoices(accounts),
+    choices: toChoices(accounts, "name"),
   });
 
-  const summary = AccountSummary.find(account.id);
+  const entries = EntryModel.findByAccountId(account.id);
+  const balance = EntryModel.calculateCurrentBalance(account.id, entries);
 
-  const output = `${AccountSummary.render(summary)}
+  const table = renderTable(
+    entries,
+    (e) => [
+      e.date.toISOString().split("T")[0],
+      currency((e.fromAccount.amount / 100).toFixed(2)),
+      e.description,
+      e.toAccount.name,
+    ],
+    { separator: " | " },
+  );
 
-balance: ${currency(summary.balance, 0)}
+  console.log(`${table}
 
-💳 ${account.name} - ${account.description} (${account.type}, #${account.id})`;
+balance: ${$(balance)}
 
-  console.log(output);
+💳 ${account.name} - ${account.description} (${account.type}, #${account.id})`);
 }

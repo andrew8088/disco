@@ -20,6 +20,10 @@ export function currency(val: string, pad = 12) {
     .padStart(pad);
 }
 
+export function $(cents: number) {
+  return currency((cents / 100).toFixed(2), 0);
+}
+
 export function toChoices<T, K extends keyof T>(items: T[], key: K) {
   return items.map((i) => ({
     name: i[key],

@@ -20,11 +20,13 @@ type JournalEntry = {
     id: Id;
     name: string;
     amount: number;
+    transactionId: Id;
   };
   toAccount: {
     id: Id;
     name: string;
     amount: number;
+    transactionId: Id;
   };
 };
 
@@ -50,6 +52,10 @@ export function create(data: CreateEntryData): JournalEntry {
   return hydrateAndRender(entry);
 }
 
+export function findAll(): JournalEntry[] {
+  return EntryQuery.findAll().map(hydrateAndRender);
+}
+
 export function findByAccountId(accountId: Id): JournalEntry[] {
   return TransactionQuery.findByAccountId(accountId)
     .map((t) => {
@@ -57,6 +63,19 @@ export function findByAccountId(accountId: Id): JournalEntry[] {
       return hydrateAndRender(entry);
     })
     .toSorted((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+export function calculateCurrentBalance(accountId: Id, entries: JournalEntry[]): number {
+  let balance = 0;
+  for (const entry of entries) {
+    if (entry.fromAccount.id === accountId) {
+      balance += entry.fromAccount.amount;
+    } else {
+      balance += entry.toAccount.amount;
+    }
+  }
+
+  return balance;
 }
 
 type UserForm<T> = {
@@ -120,11 +139,13 @@ function render(
       id: fromAccount.id,
       name: fromAccount.name,
       amount: fromTrx.amount,
+      transactionId: fromTrx.id,
     },
     toAccount: {
       id: toAccount.id,
       name: toAccount.name,
       amount: toTrx.amount,
+      transactionId: toTrx.id,
     },
   };
 }

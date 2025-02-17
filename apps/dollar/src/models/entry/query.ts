@@ -32,6 +32,10 @@ export function findById(id: Id): EntryObject {
 
 export function findByIds(ids: Id[]): EntryObject[] {
   const result = getDb().prepare("SELECT * FROM journal_entries WHERE id in (?)").all(ids);
+  return result.map((r) => entryRowParser.parse(r));
+}
 
+export function findAll(): EntryObject[] {
+  const result = getDb().prepare("SELECT * FROM journal_entries").all();
   return result.map((r) => entryRowParser.parse(r));
 }

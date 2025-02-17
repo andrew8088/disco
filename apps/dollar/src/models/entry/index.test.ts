@@ -89,11 +89,13 @@ describe("EntryModel", () => {
         id: fromAccountId,
         name: "from",
         amount: -10,
+        transactionId: 1,
       },
       toAccount: {
         id: toAccountId,
         name: "to",
         amount: 10,
+        transactionId: 2,
       },
     });
   });

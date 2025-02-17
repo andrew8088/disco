@@ -1,17 +1,18 @@
-import * as Account from "../models/account";
-import * as AccountSummary from "../models/account-summary";
-import { currency } from "../utils";
+import * as AccountQuery from "../models/account/query";
+import * as EntryModel from "../models/entry/model";
 
 export async function command() {
-  const accounts = Account.find();
-  const accountAndSummaryPairs = accounts
+  const accounts = AccountQuery.findAll();
+
+  const accountAndEntries = accounts
     .filter((a) => a.type !== "expense" && a.type !== "placeholder")
-    .map((a) => [a, AccountSummary.find(a.id)] as const);
+    .map((a) => [a, EntryModel.findByAccountId(a.id)] as const);
 
   let total = 0;
-  for (const [account, summary] of accountAndSummaryPairs) {
-    total += parseFloat(summary.balance);
-    console.log(account.name.padEnd(15), currency(summary.balance));
+  for (const [account, entries] of accountAndEntries) {
+    const balance = EntryModel.calculateCurrentBalance(account.id, entries);
+    console.log(account.name.padEnd(15), balance / 100);
+    total += balance;
   }
-  console.log("".padEnd(15), currency(total.toFixed(2)));
+  console.log("".padEnd(15), total / 100);
 }
