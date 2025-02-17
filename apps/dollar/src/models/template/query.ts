@@ -1,6 +1,6 @@
 import { groupBy } from "@disco/common";
 import * as z from "@disco/parz";
-import { getDb } from "../database";
+import { Id, getDb } from "../../database";
 
 const nullable = <T>(p: z.Parz<T>) => z.or([p, z.literal(null)]);
 
@@ -16,13 +16,21 @@ const templateRowParser = z.object({
 
 export type TemplateRow = z.Infer<typeof templateRowParser>;
 
-export type Template = {
+export type TemplateObject = {
   id: string;
   name: string;
-  transactions: Array<Omit<TemplateRow, "id" | "name" | "date"> & { date: Date | null }>;
+  transactions: Array<
+    Partial<{
+      date: Date;
+      amount: number;
+      fromAccountId: Id;
+      toAccountId: Id;
+      description: string;
+    }>
+  >;
 };
 
-export function find(): Template[] {
+export function findAll(): TemplateObject[] {
   const raw = getDb()
     .prepare(
       "SELECT id, name, fromAccountId, toAccountId, description, date, amount FROM templates",
@@ -33,16 +41,12 @@ export function find(): Template[] {
   return Object.entries(groupBy(rows, (row) => String(row.id))).map(([id, rows]) => ({
     id,
     name: rows[0].name,
-    transactions: rows.map(({ id, name, date, ...rest }) => ({
-      ...rest,
-      date: date ? new Date(date) : null,
+    transactions: rows.map((r) => ({
+      date: r.date ? new Date(r.date) : undefined,
+      amount: r.amount || undefined,
+      fromAccountId: r.fromAccountId || undefined,
+      toAccountId: r.toAccountId || undefined,
+      description: r.description || undefined,
     })),
-  }));
-}
-
-export function toChoices(templates: Template[]) {
-  return templates.map((template) => ({
-    name: template.name,
-    value: template,
   }));
 }

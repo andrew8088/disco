@@ -1,5 +1,5 @@
 import { mustFind } from "@disco/common";
-import { Id, idParser } from "../../database";
+import { Id } from "../../database";
 import * as AccountQuery from "../account/query";
 import * as TransactionQuery from "../transaction/query";
 import * as EntryQuery from "./query";

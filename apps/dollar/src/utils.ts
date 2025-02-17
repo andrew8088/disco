@@ -19,3 +19,10 @@ export function currency(val: string, pad = 12) {
     .replace(/(\d)(\d\d\d\.)/, "$1,$2")
     .padStart(pad);
 }
+
+export function toChoices<T, K extends keyof T>(items: T[], key: K) {
+  return items.map((i) => ({
+    name: i[key],
+    value: i,
+  }));
+}
