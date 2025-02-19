@@ -17,7 +17,7 @@ export function insert(data: EntryInsert) {
 
 const entryRowParser = z.object({
   id: idParser,
-  date: z.string(), // TODO write z.isoStrToDate()
+  date: z.coerceDate(),
   description: z.string(),
   notes: z.or([z.string(), z.literal(null)]),
 });
