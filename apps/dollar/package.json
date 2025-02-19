@@ -14,7 +14,7 @@
     "lint": "biome check --write .",
     "build": "unbuild",
     "test": "NODE_ENV=test DOLLAR_PATH=$(mktemp) vitest",
-    "run": "pnpm build && node ./dist/index.mjs"
+    "go": "pnpm build && node ./dist/index.mjs"
   },
   "keywords": [],
   "author": "",
