@@ -1,6 +1,9 @@
 import * as fs from "node:fs/promises";
 import * as nPath from "node:path";
 
+export type File = { path: string; content: string };
+export type TransformFn = (data: File) => Promise<File>;
+
 export async function* walk(root: string): AsyncGenerator<string> {
   const srcStat = await fs.stat(root);
 
@@ -14,9 +17,6 @@ export async function* walk(root: string): AsyncGenerator<string> {
     yield root;
   }
 }
-
-type File = { path: string; content: string };
-type TransformFn = (data: File) => Promise<File>;
 
 export async function* read(src: string): AsyncGenerator<File> {
   for await (const path of walk(src)) {
