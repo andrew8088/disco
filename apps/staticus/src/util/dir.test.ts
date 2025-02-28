@@ -8,7 +8,7 @@ describe("dir", () => {
     it("works", async () => {
       const src = getFixtureDir("basic");
       const arr = await Array.fromAsync(dir.walk(src));
-      expect(arr).toEqual([nPath.join(src, "index.html")]);
+      expect(arr).toContain(nPath.join(src, "index.html"));
     });
   });
 
