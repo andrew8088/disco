@@ -1,7 +1,7 @@
 ---
-meta: three
+meta: one
 ---
 
-## Title
+## Post Title 1
 
 Here's some content
