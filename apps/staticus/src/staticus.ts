@@ -32,13 +32,18 @@ export default class Staticus {
     }
   }
 
-  static passthrough(src: string): (c: Config) => CollectionConfig {
+  static passthrough(
+    src: string,
+    opts: { recursive: boolean } = { recursive: true },
+  ): (c: Config) => CollectionConfig {
     return (config: Config) => ({
-      src: dir.read(nPath.join(config.baseDir, src)),
-      transform: (file: dir.File) => ({
-        ...file,
-        path: file.path.replace(config.baseDir, config.output),
-      }),
+      src: dir.read(nPath.join(config.baseDir, src), opts.recursive),
+      transform: (file: dir.File) => {
+        return {
+          ...file,
+          path: file.path.replace(config.baseDir, config.output),
+        };
+      },
     });
   }
 

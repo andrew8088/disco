@@ -62,4 +62,42 @@ describe("staticus", () => {
       expect(mdTitle).toEqual(htmlTitle);
     }
   });
+
+  it("works with two collections", async () => {
+    const baseDir = getFixtureDir("basic");
+    const output = await getTmpDir();
+
+    const site = new Staticus({
+      baseDir,
+      output,
+      collections: [Staticus.passthrough(".", { recursive: false }), Staticus.markdown("notes")],
+    });
+
+    await site.build();
+
+    const originalIndex = await fs.readFile(baseDir + "/index.html", "utf-8");
+    const newIndex = await fs.readFile(output + "/index.html", "utf-8");
+
+    expect(originalIndex).toEqual(newIndex);
+
+    const sourceFiles = await Array.fromAsync(walk(baseDir + "/notes"));
+    const outputFiles = await Array.fromAsync(walk(output + "/notes"));
+    expect(sourceFiles.length).toEqual(outputFiles.length);
+
+    for await (const [idx, file] of Object.entries(sourceFiles)) {
+      const originalFile = await fs.readFile(file, "utf-8");
+      const newFile = await fs.readFile(outputFiles[Number(idx)], "utf-8");
+
+      const mdTitle = mustFind(originalFile.split("\n"), (line) => line.startsWith("##"))
+        .replace("##", "")
+        .trim();
+
+      const htmlTitle = mustFind(newFile.split("\n"), (line) => line.startsWith("<h2>"))
+        .replace("<h2>", "")
+        .replace("</h2>", "")
+        .trim();
+
+      expect(mdTitle).toEqual(htmlTitle);
+    }
+  });
 });
