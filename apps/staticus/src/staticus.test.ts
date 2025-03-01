@@ -29,7 +29,7 @@ describe("staticus", () => {
 
     for await (const [idx, file] of Object.entries(sourceFiles)) {
       expect(await fs.readFile(file, "utf-8")).toEqual(
-        await fs.readFile(outputFiles[idx], "utf-8"),
+        await fs.readFile(outputFiles[Number(idx)], "utf-8"),
       );
     }
   });

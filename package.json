@@ -30,6 +30,6 @@
     "unbuild": "^3.5.0"
   },
   "lint-staged": {
-    "**/*": "pnpm biome check --error-on-warnings ."
+    "**/*": "pnpm lint && git add ."
   }
 }
