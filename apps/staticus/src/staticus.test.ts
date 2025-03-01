@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { mustFind } from "@disco/common";
 import { describe, expect, it } from "vitest";
 import Staticus from "./staticus";
 import { getFixtureDir, getTmpDir } from "./testHelpers";
@@ -12,12 +13,7 @@ describe("staticus", () => {
     const site = new Staticus({
       baseDir,
       output,
-      collections: [
-        {
-          src: Staticus.fromFilesIn("."),
-          transform: Staticus.passthrough(),
-        },
-      ],
+      collections: [Staticus.passthrough(".")],
     });
 
     await site.build();
@@ -28,9 +24,46 @@ describe("staticus", () => {
     expect(sourceFiles.length).toEqual(outputFiles.length);
 
     for await (const [idx, file] of Object.entries(sourceFiles)) {
-      expect(await fs.readFile(file, "utf-8")).toEqual(
-        await fs.readFile(outputFiles[Number(idx)], "utf-8"),
-      );
+      const originalFile = await fs.readFile(file, "utf-8");
+      const newFile = await fs.readFile(outputFiles[Number(idx)], "utf-8");
+      expect(originalFile).toEqual(newFile);
+    }
+  });
+
+  it("does a markdown conversion", async () => {
+    const baseDir = getFixtureDir("basic");
+    const output = await getTmpDir();
+
+    const site = new Staticus({
+      baseDir,
+      output,
+      collections: [Staticus.markdown(".")],
+    });
+
+    await site.build();
+
+    const sourceFiles = await Array.fromAsync(walk(baseDir));
+    const outputFiles = await Array.fromAsync(walk(output));
+    expect(sourceFiles.length).toEqual(outputFiles.length);
+
+    for await (const [idx, file] of Object.entries(sourceFiles)) {
+      if (file.endsWith("index.html")) {
+        // skip index.html, was not a markdown file
+        continue;
+      }
+      const originalFile = await fs.readFile(file, "utf-8");
+      const newFile = await fs.readFile(outputFiles[Number(idx)], "utf-8");
+
+      const mdTitle = mustFind(originalFile.split("\n"), (line) => line.startsWith("##"))
+        .replace("##", "")
+        .trim();
+
+      const htmlTitle = mustFind(newFile.split("\n"), (line) => line.startsWith("<h2>"))
+        .replace("<h2>", "")
+        .replace("</h2>", "")
+        .trim();
+
+      expect(mdTitle).toEqual(htmlTitle);
     }
   });
 });
