@@ -21,7 +21,6 @@
   "dependencies": {
     "@disco/common": "workspace:^",
     "@disco/parz": "workspace:^",
-    "unbuild": "^2.0.0",
     "vitest": "^3.0.2"
   }
 }

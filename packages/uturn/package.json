@@ -3,16 +3,23 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
   "scripts": {
     "dev": "vite",
     "test": "vitest --typecheck",
-    "build": "tsc && vite build",
+    "build": "unbuild",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@disco/test-utils": "workspace:^",
-    "typescript": "^5.4.5",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3",
     "vitest": "catalog:"

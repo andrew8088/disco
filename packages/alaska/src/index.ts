@@ -28,7 +28,7 @@ type StateMachine<TData, TEvents> = {
   [Symbol.asyncIterator]: () => AsyncIterator<TData>;
 };
 
-export function createMachine<TEvents>() {
+export default function createMachine<TEvents>() {
   return function <TData, TStateKey extends string>(
     stateConfig: StateConfig<TData, TStateKey, TEvents>,
   ): StateMachine<TData, TEvents> {
