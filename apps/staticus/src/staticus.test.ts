@@ -37,20 +37,16 @@ describe("staticus", () => {
     const site = new Staticus({
       baseDir,
       output,
-      collections: [Staticus.markdown(".")],
+      collections: [Staticus.markdown("notes")],
     });
 
     await site.build();
 
-    const sourceFiles = await Array.fromAsync(walk(baseDir));
+    const sourceFiles = await Array.fromAsync(walk(baseDir + "/notes"));
     const outputFiles = await Array.fromAsync(walk(output));
     expect(sourceFiles.length).toEqual(outputFiles.length);
 
     for await (const [idx, file] of Object.entries(sourceFiles)) {
-      if (file.endsWith("index.html")) {
-        // skip index.html, was not a markdown file
-        continue;
-      }
       const originalFile = await fs.readFile(file, "utf-8");
       const newFile = await fs.readFile(outputFiles[Number(idx)], "utf-8");
 
