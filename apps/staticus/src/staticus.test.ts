@@ -1,4 +1,4 @@
-import * as fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import Staticus from "./staticus";
 import { getFixtureDir, getTmpDir } from "./testHelpers";

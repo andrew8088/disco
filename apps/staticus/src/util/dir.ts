@@ -1,5 +1,5 @@
-import * as fs from "node:fs/promises";
-import * as nPath from "node:path";
+import fs from "node:fs/promises";
+import nPath from "node:path";
 
 export type File = { path: string; content: string };
 export type TransformFn = (data: File) => Promise<File>;

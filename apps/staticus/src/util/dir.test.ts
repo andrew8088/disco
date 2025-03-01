@@ -1,4 +1,4 @@
-import * as nPath from "node:path";
+import nPath from "node:path";
 import { describe, expect, it } from "vitest";
 import { getFixtureDir, getTmpDir } from "../testHelpers";
 import * as dir from "./dir";
