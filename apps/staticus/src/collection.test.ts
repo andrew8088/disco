@@ -13,8 +13,10 @@ describe("Collection", () => {
           originalContent: "Hello, world!",
         };
       },
-      transformer(item) {
-        return item;
+      async *transformer(items) {
+        for await (const item of items) {
+          yield item;
+        }
       },
       writer(item) {
         out.push(item);

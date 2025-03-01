@@ -3,14 +3,14 @@ export default function collection<R, T>({
   transformer,
   writer,
 }: {
-  reader: () => AsyncGenerator<R>;
-  transformer: (item: R) => T;
+  reader: () => AsyncIterable<R>;
+  transformer: (item: AsyncIterable<R>) => AsyncIterable<T>;
   writer: (item: T) => void;
 }) {
   return {
     async build() {
-      for await (const item of reader()) {
-        writer(transformer(item));
+      for await (const item of transformer(reader())) {
+        writer(item);
       }
     },
   };
