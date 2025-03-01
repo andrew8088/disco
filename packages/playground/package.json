@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "@disco/common": "workspace:^",
-    "@types/node": "^22.0.2",
     "tsx": "^4.19.1"
   }
 }

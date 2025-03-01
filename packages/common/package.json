@@ -19,8 +19,5 @@
   "devDependencies": {
     "@disco/test-utils": "workspace:^",
     "vitest": "catalog:"
-  },
-  "dependencies": {
-    "@types/node": "^22.0.2"
   }
 }
