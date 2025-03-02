@@ -6,6 +6,7 @@ import { splitFrontmatter } from "./util/yaml";
 export async function* yamlFrontMatter<T extends StandardSchemaV1>(
   items: AsyncIterable<BaseItem>,
   schema: T,
+  { required } = { required: true },
 ): AsyncGenerator<{
   data: StandardSchemaV1.InferOutput<T>;
   content: string;
@@ -14,6 +15,20 @@ export async function* yamlFrontMatter<T extends StandardSchemaV1>(
 }> {
   for await (const item of items) {
     const [frontMatter, content] = splitFrontmatter(item.originalContent);
+
+    if (!frontMatter) {
+      if (required) {
+        throw new Error(`No frontmatter found in ${item.originalPath}`);
+      }
+      yield {
+        data: undefined,
+        content,
+        originalPath: item.originalPath,
+        originalContent: item.originalContent,
+      };
+      continue;
+    }
+
     let result = schema["~standard"].validate(frontMatter);
 
     if (result instanceof Promise) result = await result;
@@ -31,17 +46,14 @@ export async function* yamlFrontMatter<T extends StandardSchemaV1>(
   }
 }
 
-export async function* markdown(
-  items: AsyncIterable<{
-    content: string;
-  }>,
-): AsyncGenerator<{
-  content: string;
-}> {
+export async function* markdown<T extends { content: string }>(
+  items: AsyncIterable<T>,
+): AsyncGenerator<T> {
   const md = markdownit();
 
   for await (const item of items) {
     yield {
+      ...item,
       content: md.render(item.content),
     };
   }

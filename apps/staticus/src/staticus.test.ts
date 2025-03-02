@@ -1,25 +1,41 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 import { mustFind } from "@disco/common";
+import * as z from "valibot";
 import { describe, expect, it } from "vitest";
+import * as reader from "./reader";
 import Staticus from "./staticus";
 import { getFixtureDir, getTmpDir } from "./testHelpers";
+import * as transformers from "./transformers";
 import { walk } from "./util/dir";
+import * as writer from "./writer";
+
+async function* mapAsync<T, U>(
+  items: AsyncIterable<T>,
+  fn: (x: T) => Promise<U>,
+): AsyncGenerator<U> {
+  for await (const item of items) {
+    yield fn(item);
+  }
+}
 
 describe("staticus", () => {
   it("does a basic copy", async () => {
-    const baseDir = getFixtureDir("basic");
-    const output = await getTmpDir();
+    const srcDir = getFixtureDir("basic");
+    const destDir = await getTmpDir();
 
-    const site = new Staticus({
-      baseDir,
-      output,
-      collections: [Staticus.passthrough(".")],
-    });
+    const files = fs.glob(path.join(srcDir, "**/*.{md,html}"));
+    const a = reader.files(files);
+    const c = mapAsync(a, async (item) => ({
+      ...item,
+      content: item.originalContent,
+      outputPath: item.originalPath.replace(srcDir, destDir),
+    }));
 
-    await site.build();
+    await writer.write(c, { root: "/" });
 
-    const sourceFiles = await Array.fromAsync(walk(baseDir));
-    const outputFiles = await Array.fromAsync(walk(output));
+    const sourceFiles = await Array.fromAsync(walk(srcDir));
+    const outputFiles = await Array.fromAsync(walk(destDir));
 
     expect(sourceFiles.length).toEqual(outputFiles.length);
 
@@ -31,19 +47,24 @@ describe("staticus", () => {
   });
 
   it("does a markdown conversion", async () => {
-    const baseDir = getFixtureDir("basic");
-    const output = await getTmpDir();
+    const srcDir = getFixtureDir("basic");
+    const destDir = await getTmpDir();
 
-    const site = new Staticus({
-      baseDir,
-      output,
-      collections: [Staticus.markdown("notes")],
+    const files = fs.glob(path.join(srcDir, "notes/*.md"));
+    const a = reader.files(files);
+    const b = transformers.yamlFrontMatter(a, z.record(z.string(), z.string()), {
+      required: false,
     });
+    const c = transformers.markdown(b);
+    const d = mapAsync(c, async (item) => ({
+      ...item,
+      outputPath: item.originalPath.replace(srcDir, destDir),
+    }));
 
-    await site.build();
+    await writer.write(d, { root: "/" });
 
-    const sourceFiles = await Array.fromAsync(walk(baseDir + "/notes"));
-    const outputFiles = await Array.fromAsync(walk(output));
+    const sourceFiles = await Array.fromAsync(walk(srcDir + "/notes"));
+    const outputFiles = await Array.fromAsync(walk(destDir));
     expect(sourceFiles.length).toEqual(outputFiles.length);
 
     for await (const [idx, file] of Object.entries(sourceFiles)) {
