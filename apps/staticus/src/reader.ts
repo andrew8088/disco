@@ -1,7 +1,17 @@
+import fs from "node:fs/promises";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { splitFrontmatter } from "./util/yaml";
 
 export type BaseItem = { originalPath: string; originalContent: string };
+
+export async function* files(src: AsyncIterable<string>): AsyncGenerator<BaseItem> {
+  for await (const path of src) {
+    yield {
+      originalPath: path,
+      originalContent: await fs.readFile(path, "utf-8"),
+    };
+  }
+}
 
 export async function* yamlFrontMatter<T extends StandardSchemaV1>(
   items: AsyncIterable<BaseItem>,
