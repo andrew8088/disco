@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 import collection from "./collection";
-
-type T = { originalPath: string; originalContent: string };
+import { BaseItem } from "./reader";
 
 describe("Collection", () => {
   it("passes data from the reader to the transformer to the writer", async () => {
-    const out: Array<T> = [];
-    const c = collection<T, T>({
+    const out: Array<BaseItem> = [];
+    const c = collection({
       async *reader() {
         yield {
           originalPath: "./post1.md",

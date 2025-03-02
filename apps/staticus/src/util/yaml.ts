@@ -1,25 +1,15 @@
-import * as z from "@disco/parz";
 import yaml from "js-yaml";
 
-const frontmatterRegex = /^---\n([\s\S]+?)\n---/;
+const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 
-const recordParser = z.record(z.string(), z.string());
-
-export function extractFrontmatter(content: string): Record<string, string> {
+export function splitFrontmatter(content: string): [unknown, string] {
   const match = content.match(frontmatterRegex);
 
   if (!match) {
-    return {};
+    return [undefined, content];
   }
+  const frontmatter = match[1];
+  const rest = match[2].trim();
 
-  try {
-    return recordParser.parse(yaml.load(match[1]));
-  } catch (error) {
-    console.error("Error parsing YAML frontmatter:", error);
-    return {};
-  }
-}
-
-export function removeFrontmatter(content: string): string {
-  return content.replace(frontmatterRegex, "");
+  return [yaml.load(frontmatter), rest];
 }

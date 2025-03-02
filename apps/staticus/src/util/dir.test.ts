@@ -18,7 +18,7 @@ describe("dir", () => {
       const arr = await Array.fromAsync(dir.read(src));
       expect(arr[0]).toEqual({
         path: nPath.join(src, "index.html"),
-        content: "<h1>hello world</h1>\n",
+        content: "<h1>index page</h1>\n",
       });
     });
   });
@@ -32,7 +32,7 @@ describe("dir", () => {
       const arr = await Array.fromAsync(dir.read(dest));
       expect(arr[0]).toEqual({
         path: nPath.join(dest, "index.html"),
-        content: "<h1>hello world</h1>\n",
+        content: "<h1>index page</h1>\n",
       });
     });
   });

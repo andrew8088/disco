@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import nPath from "node:path";
 import markdownit from "markdown-it";
 import * as dir from "./util/dir";
-import { removeFrontmatter } from "./util/yaml";
+import { splitFrontmatter } from "./util/yaml";
 
 type CollectionConfig = {
   src: AsyncGenerator<dir.File>;
@@ -53,7 +53,7 @@ export default class Staticus {
     return (config: Config) => ({
       src: dir.read(nPath.join(config.baseDir, src)),
       transform: (file: dir.File) => {
-        const content = removeFrontmatter(file.content).trim();
+        const [, content] = splitFrontmatter(file.content);
         return {
           content: file.path.endsWith("md") ? md.render(content) : content,
           path: file.path.replace(config.baseDir, config.output).replace(".md", ".html"),
