@@ -19,7 +19,7 @@ describe("writer", () => {
 
     const root = await getTmpDir();
 
-    await writer.write(start(), { root });
+    await writer.write(start(), { destDir: root, srcDir: "" });
 
     const files = await Array.fromAsync(fs.glob(path.join(root, "*.html")));
 

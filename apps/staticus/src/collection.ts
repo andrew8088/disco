@@ -1,17 +1,17 @@
+import { Options } from "./staticus";
+
 export default function collection<R, T>({
   reader,
   transformer,
   writer,
 }: {
-  reader: () => AsyncIterable<R>;
-  transformer: (item: AsyncIterable<R>) => AsyncIterable<T>;
-  writer: (item: T) => void;
+  reader: (opts: Options) => AsyncIterable<R>;
+  transformer: (items: AsyncIterable<R>, opts: Options) => AsyncGenerator<T>;
+  writer: (items: AsyncIterable<T>, opts: Options) => Promise<void>;
 }) {
   return {
-    async build() {
-      for await (const item of transformer(reader())) {
-        writer(item);
-      }
+    async build(opts: Options) {
+      await writer(transformer(reader(opts), opts), opts);
     },
   };
 }

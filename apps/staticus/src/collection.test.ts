@@ -17,12 +17,15 @@ describe("Collection", () => {
           yield item;
         }
       },
-      writer(item) {
-        out.push(item);
+      async writer(items) {
+        out.push(...(await Array.fromAsync(items)));
       },
     });
 
-    await c.build();
+    await c.build({
+      srcDir: "",
+      destDir: "",
+    });
 
     expect(out[0]).toEqual({
       originalPath: "./post1.md",

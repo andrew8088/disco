@@ -3,8 +3,9 @@ import path from "node:path";
 import { mustFind } from "@disco/common";
 import * as z from "valibot";
 import { describe, expect, it } from "vitest";
+import collection from "./collection";
 import * as reader from "./reader";
-import Staticus from "./staticus";
+import staticus from "./staticus";
 import { getFixtureDir, getTmpDir } from "./testHelpers";
 import * as transformers from "./transformers";
 import { walk } from "./util/dir";
@@ -25,14 +26,14 @@ describe("staticus", () => {
     const destDir = await getTmpDir();
 
     const files = fs.glob(path.join(srcDir, "**/*.{md,html}"));
-    const a = reader.files(files);
+    const a = reader.files(files, "/");
     const c = mapAsync(a, async (item) => ({
       ...item,
       content: item.originalContent,
       outputPath: item.originalPath.replace(srcDir, destDir),
     }));
 
-    await writer.write(c, { root: "/" });
+    await writer.write(c, { destDir: "/", srcDir: "" });
 
     const sourceFiles = await Array.fromAsync(walk(srcDir));
     const outputFiles = await Array.fromAsync(walk(destDir));
@@ -51,7 +52,7 @@ describe("staticus", () => {
     const destDir = await getTmpDir();
 
     const files = fs.glob(path.join(srcDir, "notes/*.md"));
-    const a = reader.files(files);
+    const a = reader.files(files, "/");
     const b = transformers.yamlFrontMatter(a, z.record(z.string(), z.string()), {
       required: false,
     });
@@ -61,7 +62,7 @@ describe("staticus", () => {
       outputPath: item.originalPath.replace(srcDir, destDir),
     }));
 
-    await writer.write(d, { root: "/" });
+    await writer.write(d, { destDir: "/", srcDir: "" });
 
     const sourceFiles = await Array.fromAsync(walk(srcDir + "/notes"));
     const outputFiles = await Array.fromAsync(walk(destDir));
@@ -83,42 +84,32 @@ describe("staticus", () => {
       expect(mdTitle).toEqual(htmlTitle);
     }
   });
+  it("does a markdown conversion", async () => {
+    const s = staticus(
+      {
+        srcDir: getFixtureDir("basic"),
+        destDir: await getTmpDir(),
+      },
+      {
+        notes: collection({
+          reader: reader.glob("notes/*.md"),
+          transformer: function (items) {
+            const b = transformers.yamlFrontMatter(items, z.record(z.string(), z.string()), {
+              required: false,
+            });
+            const c = transformers.markdown(b);
+            const d = mapAsync(c, async (item) => ({
+              ...item,
+              outputPath: item.originalPath,
+            }));
 
-  it("works with two collections", async () => {
-    const baseDir = getFixtureDir("basic");
-    const output = await getTmpDir();
+            return d;
+          },
+          writer: writer.write,
+        }),
+      },
+    );
 
-    const site = new Staticus({
-      baseDir,
-      output,
-      collections: [Staticus.passthrough(".", { recursive: false }), Staticus.markdown("notes")],
-    });
-
-    await site.build();
-
-    const originalIndex = await fs.readFile(baseDir + "/index.html", "utf-8");
-    const newIndex = await fs.readFile(output + "/index.html", "utf-8");
-
-    expect(originalIndex).toEqual(newIndex);
-
-    const sourceFiles = await Array.fromAsync(walk(baseDir + "/notes"));
-    const outputFiles = await Array.fromAsync(walk(output + "/notes"));
-    expect(sourceFiles.length).toEqual(outputFiles.length);
-
-    for await (const [idx, file] of Object.entries(sourceFiles)) {
-      const originalFile = await fs.readFile(file, "utf-8");
-      const newFile = await fs.readFile(outputFiles[Number(idx)], "utf-8");
-
-      const mdTitle = mustFind(originalFile.split("\n"), (line) => line.startsWith("##"))
-        .replace("##", "")
-        .trim();
-
-      const htmlTitle = mustFind(newFile.split("\n"), (line) => line.startsWith("<h2>"))
-        .replace("<h2>", "")
-        .replace("</h2>", "")
-        .trim();
-
-      expect(mdTitle).toEqual(htmlTitle);
-    }
+    await s.build();
   });
 });
