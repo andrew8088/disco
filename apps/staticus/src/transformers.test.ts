@@ -51,4 +51,18 @@ Hello, world!`,
       });
     });
   });
+
+  describe("markdown", () => {
+    it("converts content from markdown to html", async () => {
+      async function* files() {
+        yield {
+          content: "# Hello, world!\n\n- one\n- two\n- three",
+        };
+      }
+
+      const results = await Array.fromAsync(transformers.markdown(files()));
+
+      expect(results[0].content).toContain("<h1>Hello, world!</h1>");
+    });
+  });
 });

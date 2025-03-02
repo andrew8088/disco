@@ -1,4 +1,5 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
+import markdownit from "markdown-it";
 import { BaseItem } from "./reader";
 import { splitFrontmatter } from "./util/yaml";
 
@@ -26,6 +27,22 @@ export async function* yamlFrontMatter<T extends StandardSchemaV1>(
       content,
       originalPath: item.originalPath,
       originalContent: item.originalContent,
+    };
+  }
+}
+
+export async function* markdown(
+  items: AsyncIterable<{
+    content: string;
+  }>,
+): AsyncGenerator<{
+  content: string;
+}> {
+  const md = markdownit();
+
+  for await (const item of items) {
+    yield {
+      content: md.render(item.content),
     };
   }
 }
