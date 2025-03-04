@@ -48,7 +48,7 @@ export async function* yamlFrontMatter<T extends StandardSchemaV1>(
 
 export async function* markdown<T extends { content: string }>(
   items: AsyncIterable<T>,
-  md: markdownit,
+  md?: markdownit,
 ): AsyncGenerator<T> {
   md ??= markdownit();
 
