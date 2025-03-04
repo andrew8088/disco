@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import collection from "./collection";
+import { collection } from "./collection";
 import { BaseItem } from "./reader";
 
 describe("Collection", () => {

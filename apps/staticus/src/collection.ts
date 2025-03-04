@@ -10,11 +10,7 @@ export type Collection = {
   build(opts: Options): Promise<void>;
 };
 
-export default function collection<R, T>({
-  reader,
-  transformer,
-  writer,
-}: CollectionArg<R, T>): Collection {
+export function collection<R, T>({ reader, transformer, writer }: CollectionArg<R, T>): Collection {
   return {
     async build(opts: Options) {
       await writer(transformer(reader(opts), opts), opts);

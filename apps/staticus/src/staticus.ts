@@ -1,9 +1,4 @@
 import { Collection } from "./collection";
-import collection from "./collection";
-import * as kite from "./kite";
-import * as reader from "./reader";
-import * as transformers from "./transformers";
-import * as writer from "./writer";
 
 export type Options = {
   srcDir: string;
@@ -19,9 +14,3 @@ export default function staticus(options: Options, collections: Record<string, C
     },
   };
 }
-
-staticus.collection = collection;
-staticus.reader = reader;
-staticus.transformers = transformers;
-staticus.writer = writer;
-staticus.kite = kite;

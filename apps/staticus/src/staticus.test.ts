@@ -3,7 +3,7 @@ import path from "node:path";
 import { mustFind } from "@disco/common";
 import * as z from "valibot";
 import { describe, expect, it } from "vitest";
-import collection from "./collection";
+import { collection } from "./collection";
 import * as reader from "./reader";
 import staticus from "./staticus";
 import { getFixtureDir, getTmpDir } from "./testHelpers";

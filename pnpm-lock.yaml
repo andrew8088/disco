@@ -91,12 +91,6 @@ importers:
 
   apps/staticus:
     dependencies:
-      '@disco/common':
-        specifier: workspace:^
-        version: link:../../packages/common
-      '@disco/parz':
-        specifier: workspace:^
-        version: link:../../packages/parz
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.0.0
@@ -106,19 +100,25 @@ importers:
       markdown-it:
         specifier: ^14.1.0
         version: 14.1.0
-      valibot:
-        specifier: 1.0.0-rc.3
-        version: 1.0.0-rc.3(typescript@5.8.2)
-      vitest:
-        specifier: ^3.0.2
-        version: 3.0.2(@types/node@22.13.8)(terser@5.36.0)
     devDependencies:
+      '@disco/common':
+        specifier: workspace:^
+        version: link:../../packages/common
+      '@disco/parz':
+        specifier: workspace:^
+        version: link:../../packages/parz
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
       '@types/markdown-it':
         specifier: ^14.1.2
         version: 14.1.2
+      valibot:
+        specifier: 1.0.0-rc.3
+        version: 1.0.0-rc.3(typescript@5.8.2)
+      vitest:
+        specifier: ^3.0.2
+        version: 3.0.2(@types/node@22.13.8)(terser@5.36.0)
 
   packages/alaska:
     dependencies:

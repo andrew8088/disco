@@ -6,10 +6,12 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs"
     }
   },
   "files": ["dist"],
+  "types": "./dist/index.d.ts",
   "scripts": {
     "lint": "biome check --write .",
     "build": "unbuild",
@@ -19,16 +21,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@disco/common": "workspace:^",
-    "@disco/parz": "workspace:^",
     "@standard-schema/spec": "^1.0.0",
     "js-yaml": "^4.1.0",
-    "markdown-it": "^14.1.0",
-    "valibot": "1.0.0-rc.3",
-    "vitest": "^3.0.2"
+    "markdown-it": "^14.1.0"
   },
   "devDependencies": {
+    "@disco/common": "workspace:^",
+    "@disco/parz": "workspace:^",
     "@types/js-yaml": "^4.0.9",
-    "@types/markdown-it": "^14.1.2"
+    "@types/markdown-it": "^14.1.2",
+    "valibot": "1.0.0-rc.3",
+    "vitest": "^3.0.2"
   }
 }

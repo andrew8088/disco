@@ -1,5 +1,3 @@
-import { warn } from "node:console";
-
 export async function* take<T>(iterable: AsyncIterable<T>, n: number) {
   let i = 0;
   for await (const x of iterable) {
