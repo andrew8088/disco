@@ -62,6 +62,15 @@ describe("kite", () => {
       );
       expect(arr).toEqual([1, 2, 1, 2, 2, 4, 3, 6]);
     });
+    it("returns iterable or single elements", async () => {
+      const arr = await Array.fromAsync(
+        k.take(
+          k.flatMap(fib(), (x) => (x % 2 === 0 ? x : [x, x * 2])),
+          8,
+        ),
+      );
+      expect(arr).toEqual([1, 2, 1, 2, 2, 3, 6, 5]);
+    });
   });
   describe("reduce", () => {
     it("works", async () => {

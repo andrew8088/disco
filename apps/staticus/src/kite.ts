@@ -15,9 +15,14 @@ export async function* map<T, S>(iterable: AsyncIterable<T>, fn: (x: T) => S) {
   }
 }
 
-export async function* flatMap<T, S>(iterable: AsyncIterable<T>, fn: (x: T) => Iterable<S>) {
+export async function* flatMap<T, S>(iterable: AsyncIterable<T>, fn: (x: T) => S | Iterable<S>) {
   for await (const x of iterable) {
-    yield* fn(x);
+    const y = fn(x);
+    if (typeof y === "object" && y != null && Symbol.iterator in y) {
+      yield* y;
+    } else {
+      yield y;
+    }
   }
 }
 
