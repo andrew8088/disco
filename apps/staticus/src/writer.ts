@@ -4,7 +4,7 @@ import { Options } from "./staticus";
 
 export async function write(
   files: AsyncIterable<{ content: string; outputPath: string }>,
-  options: Options,
+  options: Pick<Options, "destDir">,
 ) {
   for await (const file of files) {
     const outputPath = path.join(options.destDir, file.outputPath);

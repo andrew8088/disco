@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import { mustFind } from "@disco/common";
 import * as z from "valibot";
 import { describe, expect, it } from "vitest";
@@ -25,15 +24,14 @@ describe("staticus", () => {
     const srcDir = getFixtureDir("basic");
     const destDir = await getTmpDir();
 
-    const files = fs.glob(path.join(srcDir, "**/*.{md,html}"));
-    const a = reader.files(files, "/");
+    const a = reader.glob("**/*.{md,html}")({ srcDir });
     const c = mapAsync(a, async (item) => ({
       ...item,
       content: item.originalContent,
-      outputPath: item.originalPath.replace(srcDir, destDir),
+      outputPath: item.originalPath,
     }));
 
-    await writer.write(c, { destDir: "/", srcDir: "" });
+    await writer.write(c, { destDir });
 
     const sourceFiles = await Array.fromAsync(walk(srcDir));
     const outputFiles = await Array.fromAsync(walk(destDir));
@@ -51,18 +49,17 @@ describe("staticus", () => {
     const srcDir = getFixtureDir("basic");
     const destDir = await getTmpDir();
 
-    const files = fs.glob(path.join(srcDir, "notes/*.md"));
-    const a = reader.files(files, "/");
+    const a = reader.glob("notes/*.md")({ srcDir });
     const b = transformers.yamlFrontMatter(a, z.record(z.string(), z.string()), {
       required: false,
     });
     const c = transformers.markdown(b);
     const d = mapAsync(c, async (item) => ({
       ...item,
-      outputPath: item.originalPath.replace(srcDir, destDir),
+      outputPath: item.originalPath,
     }));
 
-    await writer.write(d, { destDir: "/", srcDir: "" });
+    await writer.write(d, { destDir });
 
     const sourceFiles = await Array.fromAsync(walk(srcDir + "/notes"));
     const outputFiles = await Array.fromAsync(walk(destDir));

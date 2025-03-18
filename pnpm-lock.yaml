@@ -4,12 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-catalogs:
-  default:
-    vitest:
-      specifier: ^2.0.5
-      version: 2.0.5
-
 importers:
 
   .:
@@ -1480,9 +1474,6 @@ packages:
 
   '@types/node@22.13.8':
     resolution: {integrity: sha512-G3EfaZS+iOGYWLLRCEAXdWK9my08oHNZ+FHluRiggIYJPOXzhOiDgpVCUHaUvyIC5/fj7C/p637jdzC666AOKQ==}
-
-  '@types/node@22.4.1':
-    resolution: {integrity: sha512-1tbpb9325+gPnKK0dMm+/LMriX0vKxf6RnB0SZUqfyVkQ4fMgUSySqhxE/y8Jvs4NyF1yHzTfG9KlnkIODxPKg==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -3164,9 +3155,6 @@ packages:
       typescript:
         optional: true
 
-  undici-types@6.19.6:
-    resolution: {integrity: sha512-e/vggGopEfTKSvj4ihnOLTsqhrKRN3LeO6qSN/GxohhuRv8qH9bNQ4B8W7e/vFL+0XTnmHPB4/kegunZGA4Org==}
-
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
@@ -4330,7 +4318,7 @@ snapshots:
 
   '@types/better-sqlite3@7.6.12':
     dependencies:
-      '@types/node': 22.4.1
+      '@types/node': 22.13.8
 
   '@types/conventional-commits-parser@5.0.0':
     dependencies:
@@ -4354,10 +4342,6 @@ snapshots:
   '@types/node@22.13.8':
     dependencies:
       undici-types: 6.20.0
-
-  '@types/node@22.4.1':
-    dependencies:
-      undici-types: 6.19.6
 
   '@types/resolve@1.20.2': {}
 
@@ -6162,8 +6146,6 @@ snapshots:
       - sass
       - vue
       - vue-tsc
-
-  undici-types@6.19.6: {}
 
   undici-types@6.20.0: {}
 

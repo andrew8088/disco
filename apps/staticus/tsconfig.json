@@ -5,5 +5,5 @@
     "tsBuildInfoFile": "tsconfig.tsbuildinfo"
   },
   "include": ["src"],
-  "exclude": ["node_modules", "../../node_modules"]
+  "exclude": ["node_modules", "dist", "../../node_modules"]
 }
