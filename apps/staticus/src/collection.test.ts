@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { collection } from "./collection";
-import { BaseItem } from "./reader";
 
 describe("Collection", () => {
   it("passes data from the reader to the transformer to the writer", async () => {
-    const out: Array<BaseItem> = [];
     const c = collection({
       async *reader() {
         yield {
@@ -17,15 +15,14 @@ describe("Collection", () => {
           yield item;
         }
       },
-      async writer(items) {
-        out.push(...(await Array.fromAsync(items)));
-      },
     });
 
-    await c.build({
-      srcDir: "",
-      destDir: "",
-    });
+    const out = await Array.fromAsync(
+      c.build({
+        srcDir: "",
+        destDir: "",
+      }),
+    );
 
     expect(out[0]).toEqual({
       originalPath: "./post1.md",

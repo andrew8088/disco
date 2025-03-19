@@ -1,19 +1,16 @@
-import { Options } from "./staticus";
+import { StaticusOptions } from "./staticus";
 
 type CollectionArg<R, T> = {
-  reader: (opts: Options) => AsyncIterable<R>;
-  transformer: (items: AsyncIterable<R>, opts: Options) => AsyncGenerator<T>;
-  writer: (items: AsyncIterable<T>, opts: Options) => Promise<void>;
+  reader: (opts: StaticusOptions) => AsyncIterable<R>;
+  transformer: (items: AsyncIterable<R>, opts: StaticusOptions) => AsyncGenerator<T>;
 };
 
-export type Collection = {
-  build(opts: Options): Promise<void>;
-};
+export type Collection<T> = { build: (opts: StaticusOptions) => AsyncGenerator<T> };
 
-export function collection<R, T>({ reader, transformer, writer }: CollectionArg<R, T>): Collection {
+export function collection<R, T>({ reader, transformer }: CollectionArg<R, T>): Collection<T> {
   return {
-    async build(opts: Options) {
-      await writer(transformer(reader(opts), opts), opts);
+    build(opts: StaticusOptions) {
+      return transformer(reader(opts), opts);
     },
   };
 }

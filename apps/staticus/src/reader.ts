@@ -1,7 +1,7 @@
 import { GlobOptionsWithoutFileTypes } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { Options } from "./staticus";
+import { StaticusOptions } from "./staticus";
 
 export type BaseItem = { originalPath: string; originalContent: string };
 
@@ -15,7 +15,7 @@ export async function* files(src: AsyncIterable<string>, root: string): AsyncGen
 }
 
 export function glob(pattern: string, { exclude }: { exclude?: string[] } = {}) {
-  return function (options: Pick<Options, "srcDir">) {
+  return function (options: Pick<StaticusOptions, "srcDir">) {
     const globOpts = {
       cwd: options.srcDir,
       exclude,
