@@ -1,4 +1,4 @@
-export { staticus, collection } from "./staticus";
+export { staticus, CollectionBuilder } from "./staticus";
 export type { StaticusOptions } from "./staticus";
 export * as kite from "./kite";
 export * as reader from "./reader";
